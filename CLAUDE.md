@@ -11,6 +11,42 @@ You are building an interactive educational tutorial repository. Prefer structur
 - Run the quality gates before considering content ready.
 - Mark uncertain factual claims with `VerifyClaim` instead of presenting them as facts.
 
+## Updating An Instance From This Template
+
+When asked to update an academy instance from the template, use the template sync
+script instead of manually copying files:
+
+```bash
+/path/to/learn-template/scripts/update-template.sh --target /path/to/academy-instance
+```
+
+If you are already inside the instance and only have the copied script there,
+pass the template checkout explicitly:
+
+```bash
+pnpm update:template -- --source /path/to/learn-template
+```
+
+Before updating:
+
+- Confirm the target path is the academy instance, not the template checkout.
+- Require a clean target git worktree. The script enforces this for git repos.
+- Start with `--dry-run` if the target has valuable local customization.
+
+The updater must preserve academy-owned files:
+
+- `content/`
+- `presentations/`
+- `academy.config.ts`
+- `.env*`
+- `docker-compose.yml`
+- local dependency/build output
+
+Do not overwrite those paths manually unless the user explicitly asks for a
+platform migration that changes instance-owned files. After the update, review
+the diff and run `pnpm install`, `pnpm validate`, `pnpm test`, `pnpm lint`, and
+`pnpm build` in the target instance when feasible.
+
 ## Required Flow
 
 1. Define the tutorial with `prompts/01-curriculum-design.md`.

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "preview": "next dev",
+    "update:template": "bash scripts/update-template.sh",
     "validate": "node scripts/validate.mjs",
     "build": "next build",
     "start": "next start",

@@ -42,10 +42,50 @@ src/lib/                    # Curriculum, MDX, validation, pipeline helpers
 | --- | --- |
 | `pnpm dev` | Start the Next.js dev server |
 | `pnpm preview` | Alias for local preview |
+| `pnpm update:template` | Sync template changes into another instance |
 | `pnpm validate` | Run deterministic content quality gates |
 | `pnpm test` | Run Vitest tests |
 | `pnpm lint` | Run ESLint |
 | `pnpm build` | Build the app |
+
+## Updating From The Template
+
+From an academy instance, call the script in your template checkout:
+
+```bash
+/path/to/learn-template/scripts/update-template.sh
+```
+
+Or run it from the template checkout and pass the instance path:
+
+```bash
+scripts/update-template.sh --target /path/to/my-academy
+```
+
+The script syncs template-owned files into the target while preserving
+academy-owned files by default:
+
+- `.env*`
+- `academy.config.ts`
+- `content/`
+- `presentations/`
+- `docker-compose.yml`
+- build output and dependency directories
+
+It also preserves the target `package.json` `name` field while still allowing
+dependency and script updates from the template.
+
+Preview changes without writing files:
+
+```bash
+scripts/update-template.sh --target /path/to/my-academy --dry-run
+```
+
+If you call the copied script from inside an instance, pass the template source:
+
+```bash
+pnpm update:template -- --source /path/to/learn-template
+```
 
 ## Authoring Flow
 
