@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
-let mermaidMod: any = null;
+interface MermaidModule {
+  default: {
+    initialize: (config: Record<string, unknown>) => void;
+    render: (id: string, chart: string) => Promise<{ svg: string }>;
+  };
+}
+
+let mermaidMod: MermaidModule | null = null;
 let mermaidReady: Promise<void> | null = null;
 
 function loadMermaid() {
@@ -28,22 +35,25 @@ function loadMermaid() {
 
 interface MermaidDiagramProps {
   chart?: string;
+  fallback?: string;
   children?: React.ReactNode;
 }
 
 function extractText(node: React.ReactNode): string {
   if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(extractText).join("");
-  if (node && typeof node === "object" && "props" in node) {
-    return extractText((node as any).props.children);
+  if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+    return extractText(node.props.children);
   }
   return "";
 }
 
-export default function MermaidDiagram({ chart, children }: MermaidDiagramProps) {
+export default function MermaidDiagram({ chart, fallback, children }: MermaidDiagramProps) {
   const chartText = chart || extractText(children) || "";
   const id = useId().replace(/:/g, "-");
   const [svgHtml, setSvgHtml] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!chartText) return;
@@ -52,10 +62,10 @@ export default function MermaidDiagram({ chart, children }: MermaidDiagramProps)
     const renderDiagram = async () => {
       try {
         await loadMermaid();
-        const { svg } = await mermaidMod.default.render(`mermaid-${id}`, chartText);
+        const { svg } = await mermaidMod?.default.render(`mermaid-${id}`, chartText) ?? { svg: "" };
         if (!cancelled) setSvgHtml(svg);
       } catch {
-        if (!cancelled) setSvgHtml(`<pre>${chartText}</pre>`);
+        if (!cancelled) setFailed(true);
       }
     };
 
@@ -67,9 +77,15 @@ export default function MermaidDiagram({ chart, children }: MermaidDiagramProps)
     <div className="my-6 p-4 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-x-auto">
       {svgHtml ? (
         <div className="mermaid flex justify-center" dangerouslySetInnerHTML={{ __html: svgHtml }} />
+      ) : failed ? (
+        <pre className="mermaid whitespace-pre-wrap text-sm text-[var(--text-secondary)]">
+          {fallback || chartText}
+        </pre>
       ) : (
         <div className="mermaid flex justify-center">
-          <span className="text-sm text-[var(--text-secondary)]">Loading diagram...</span>
+          <pre className="whitespace-pre-wrap text-sm text-[var(--text-secondary)]">
+            {fallback || chartText || "Loading diagram..."}
+          </pre>
         </div>
       )}
     </div>

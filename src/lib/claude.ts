@@ -1,6 +1,6 @@
 import AnthropicVertex from "@anthropic-ai/vertex-sdk";
 import type { ChatMessage } from "@/types";
-import { academy } from "../../../academy.config";
+import { academy } from "../../academy.config";
 
 interface PromptContext {
   moduleTitle?: string;

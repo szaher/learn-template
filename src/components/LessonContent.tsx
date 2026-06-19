@@ -45,14 +45,17 @@ export default function LessonContent({
   });
 
   useEffect(() => {
-    setHasNotes(getLessonNote(mod.id, lesson.slug).length > 0);
+    queueMicrotask(() => {
+      setHasNotes(getLessonNote(mod.id, lesson.slug).length > 0);
+    });
   }, [mod.id, lesson.slug]);
 
   useEffect(() => {
     if (!contentRef.current) return;
     const timer = setTimeout(() => {
       if (contentRef.current) {
-        setSections(extractSections(contentRef.current));
+        const container = contentRef.current;
+        setSections(extractSections(container).filter((section) => section.headingElement !== container));
       }
     }, 500);
     return () => clearTimeout(timer);
@@ -166,9 +169,7 @@ export default function LessonContent({
           <div ref={contentRef} className="prose prose-invert max-w-none relative">
             {children}
 
-            {sections.map((section, i) => {
-              if (section.headingElement === contentRef.current) return null;
-              return (
+            {sections.map((section, i) => (
                 <button
                   key={section.id}
                   onClick={() => handlePlaySection(i)}
@@ -186,8 +187,7 @@ export default function LessonContent({
                     <polygon points="6,4 20,12 6,20" />
                   </svg>
                 </button>
-              );
-            })}
+            ))}
           </div>
 
           {quiz && quiz.length > 0 && (

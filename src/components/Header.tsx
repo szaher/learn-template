@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import ExportMenu from "./ExportMenu";
 import ThemeToggle from "./ThemeToggle";
-import { academy } from "../../../academy.config";
+import { academy } from "../../academy.config";
 
 export default function Header() {
   const pathname = usePathname();

@@ -23,7 +23,9 @@ export default function NotesPanel({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setText(getLessonNote(moduleId, lessonSlug));
+    queueMicrotask(() => {
+      setText(getLessonNote(moduleId, lessonSlug));
+    });
   }, [moduleId, lessonSlug]);
 
   useEffect(() => {

@@ -1,113 +1,70 @@
-# Prompt: Lesson Writing
+# 02 Lesson Outline and MDX Prompt
 
-Use this prompt to write individual MDX lesson files.
+## System Prompt
 
----
+You write lesson artifacts from approved structured inputs. Return only JSON. Do not invent citations. Mark claims as `verify` when evidence is missing or stale.
 
-## Context
+## Task Prompt
 
-You are writing a lesson for an interactive academy. Each lesson is an `.mdx` file with YAML frontmatter and a body that uses custom React components for diagrams and code.
+Create a lesson artifact plan and MDX body for one lesson from a validated `TutorialSpec`.
 
-## Input Variables
+## Required Inputs
 
-- `{{TOPIC}}` — The lesson's specific topic
-- `{{MODULE_TITLE}}` — The parent module name (for context)
-- `{{LESSON_TITLE}}` — The lesson title from meta.json
-- `{{DIAGRAM_TYPES}}` — Which diagram types to include (from meta.json)
-- `{{HAS_CODE}}` — Whether to include code examples
-- `{{HAS_QUIZ}}` — Whether to include quiz questions
-- `{{CODE_LANGUAGE}}` — Primary code language (e.g., "python")
-- `{{PRIOR_LESSONS}}` — Titles of lessons that come before this one (for continuity)
-
-## Prompt
-
-```
-Write an MDX lesson file for "{{LESSON_TITLE}}" in the "{{MODULE_TITLE}}" module.
-
-Topic: {{TOPIC}}
-This lesson follows: {{PRIOR_LESSONS}}
-
-FORMATTING RULES — follow these exactly:
-
-1. FRONTMATTER: Start with YAML frontmatter containing `title` and optionally `quiz`
-2. HEADINGS: Use ## for sections (never # — that's reserved for the page title)
-3. BOLD: First occurrence of every key term should be **bold**
-4. SECTIONS: Start with an Overview, end with a Summary
-
-COMPONENTS — use these exact syntaxes:
-
-MermaidDiagram (for {{DIAGRAM_TYPES}} diagrams):
-<MermaidDiagram chart={`graph TD
-    A[Node] --> B[Node]
-    subgraph Group["Label"]
-        B --> C[Node]
-    end
-    style Group fill:#ebf8ff,stroke:#3182ce
-`} />
-
-CodeBlock (if hasCode is true):
-<CodeBlock code={`# your code here
-def example():
-    pass
-`} language="{{CODE_LANGUAGE}}" filename="example.py" />
-
-QUIZ (if hasQuiz is true):
-- Include 2-4 questions in the frontmatter quiz array
-- Use 3-4 plausible options per question
-- Vary correctIndex (don't always use 0)
-- Questions should test understanding, not memorization
-
-CONTENT GUIDELINES:
-- Lead with WHY this concept matters before HOW it works
-- Use at least one MermaidDiagram to illustrate architecture or flow
-- Include at least one CodeBlock with a realistic, runnable example (if hasCode)
-- Use bulleted lists for key takeaways
-- Use blockquotes (>) for tips or important warnings
-- Target 8-15 minutes reading time
-- Use analogies to connect new concepts to familiar ones
-- Reference prior lessons naturally: "As we saw in [prior lesson]..."
-
-OUTPUT: The complete .mdx file content, ready to save.
+```json
+{
+  "tutorialSpec": {},
+  "lessonId": "string",
+  "approvedSourceExcerpts": [
+    {
+      "referenceId": "string",
+      "excerpt": "string",
+      "allowedClaims": ["string"]
+    }
+  ],
+  "learnerLevel": "beginner | intermediate | advanced"
+}
 ```
 
-## Example Output Structure
+## Output Schema
 
-```mdx
----
-title: "Lesson Title"
-quiz:
-  - question: "..."
-    options: ["A", "B", "C", "D"]
-    correctIndex: 2
----
-
-## Overview
-
-Opening paragraph explaining why this matters...
-
-## Core Concept
-
-Explanation with **bold key terms**...
-
-<MermaidDiagram chart={`...`} />
-
-## Working Example
-
-<CodeBlock code={`...`} language="python" filename="example.py" />
-
-## Key Takeaways
-
-- Point 1
-- Point 2
-- Point 3
-
-> **Tip:** Important insight here.
-
-## Summary
-
-Wrap-up connecting to the next lesson...
+```json
+{
+  "lessonId": "string",
+  "frontmatter": {
+    "title": "string",
+    "description": "string",
+    "estimatedMinutes": 10,
+    "references": ["reference-id"],
+    "claimIds": ["claim-id"]
+  },
+  "mdx": "string",
+  "claims": [
+    {
+      "id": "claim-id",
+      "text": "string",
+      "status": "verified | verify | unsupported",
+      "referenceIds": ["reference-id"]
+    }
+  ],
+  "coverage": {
+    "objectiveIds": ["objective-id"],
+    "conceptIds": ["concept-id"],
+    "prerequisitesUsed": ["string"]
+  },
+  "reviewNotes": ["string"]
+}
 ```
 
-## Next Step
+## MDX Requirements
 
-After writing lessons, use `03-quiz-creation.md` to add or improve quizzes.
+- Use `LearningObjectives`, `Prerequisites`, `KeyTerms`, `Callout`, `Diagram`, `WorkedExample`, `Exercise`, `Citation`, and `VerifyClaim` where appropriate.
+- Include graceful fallback text for every diagram.
+- Include narration hooks only when a concise voice script adds value.
+- Include source-quality labels for citations.
+- Keep each section focused on one learner action.
+
+## Anti-Hallucination Rules
+
+- Do not state tool versions, prices, popularity, legal requirements, or current events unless the input source excerpts support them.
+- Wrap uncertain claims in `VerifyClaim` with `status: "verify"`.
+- Put unsupported claims in `reviewNotes`; do not include them as instructional facts.

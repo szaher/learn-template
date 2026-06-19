@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage as ChatMessageType } from "@/types";
 import ChatMessage from "./ChatMessage";
-import { academy, storageKeys } from "../../../academy.config";
+import { academy, storageKeys } from "../../academy.config";
 
 interface ChatInterfaceProps {
   initialContext?: {

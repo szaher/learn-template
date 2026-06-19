@@ -22,6 +22,22 @@ Welcome to your first lesson. This file is a **format reference** that demonstra
 
 Each lesson is an `.mdx` file that combines standard Markdown with custom React components. The **frontmatter** block above defines the title and an optional quiz array that powers the interactive quiz section at the bottom of the lesson.
 
+<LearningObjectives items={[
+  "Identify the reusable components available for structured lessons.",
+  "Explain how citations and claim verification states support review.",
+  "Choose an appropriate fallback for diagrams and other rich artifacts."
+]} />
+
+<Prerequisites items={[
+  "Basic Markdown syntax",
+  "Comfort reading small JSON and MDX examples"
+]} />
+
+<KeyTerms terms={[
+  { term: "Quality gate", definition: "A deterministic check that content must pass before publication." },
+  { term: "Claim state", definition: "A label showing whether a factual statement is verified, needs verification, or is unsupported." }
+]} />
+
 ## Architecture diagram
 
 Use the `MermaidDiagram` component to embed diagrams directly in your lesson. The `graph TD` direction renders a top-down layout, and **subgraphs** let you group related nodes.
@@ -42,6 +58,17 @@ Use the `MermaidDiagram` component to embed diagrams directly in your lesson. Th
     style Processing fill:#ebf8ff,stroke:#3182ce
     style Output fill:#f0fff4,stroke:#38a169
 `} />
+
+<Diagram
+  chart={`graph LR
+    Spec[Tutorial Spec] --> Prompt[Structured Prompt]
+    Prompt --> Output[JSON Output]
+    Output --> Validate[Quality Gates]
+    Validate --> Review[Human Review]
+  `}
+  fallback="Tutorial specification flows into structured prompts, JSON output, quality gates, and human review."
+  caption="Generation artifacts move through validation before review."
+/>
 
 ## Data flow diagram
 
@@ -101,6 +128,39 @@ When creating a new lesson, follow these steps:
 5. Add quiz questions to the frontmatter to reinforce learning
 
 > **Tip:** Keep each lesson focused on a single concept. Shorter lessons with clear diagrams and a quick quiz are more effective than long, dense pages.
+
+<Callout title="Source discipline" tone="verify">
+  Use <Citation id="ref-mdx" href="https://mdxjs.com/" quality="official-docs">official MDX documentation</Citation> when explaining MDX syntax, and mark claims that still need source review.
+</Callout>
+
+<VerifyClaim status="verify">
+  Claims about current tool popularity or ecosystem adoption should be checked against recent sources before publication.
+</VerifyClaim>
+
+<Flashcards cards={[
+  { front: "What should a diagram include?", back: "Readable source plus fallback text that preserves the instructional meaning." },
+  { front: "When should a claim be marked verify?", back: "When it is plausible but lacks sufficient evidence in the approved source plan." }
+]} />
+
+<WorkedExample title="Turn a risky claim into reviewable content" steps={[
+  "Find the unsupported factual claim.",
+  "Wrap it in VerifyClaim with status set to verify.",
+  "Add a citation task to the source plan."
+]}>
+  A reviewable lesson makes uncertainty explicit instead of hiding it in polished prose.
+</WorkedExample>
+
+<Exercise title="Classify a claim" answer="Mark it as verify until a recent source supports it.">
+  A generated lesson says a library is the recommended option for current projects, but the source plan has no current reference. What should you do?
+</Exercise>
+
+<QuizBlock questions={[
+  {
+    prompt: "Why prefer structured JSON from generation prompts?",
+    choices: ["It is easier to validate", "It removes the need for review", "It prevents all errors"],
+    answer: "Structured JSON is easier to validate, but it still needs review."
+  }
+]} />
 
 ## Summary
 

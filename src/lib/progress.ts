@@ -1,5 +1,5 @@
 import type { LessonProgress, ProgressState } from "@/types";
-import { storageKeys } from "../../../academy.config";
+import { storageKeys } from "../../academy.config";
 
 const DEFAULT_STATE: ProgressState = {
   lessons: {},

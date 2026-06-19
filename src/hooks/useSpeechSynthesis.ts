@@ -98,6 +98,7 @@ export function useSpeechSynthesis(options?: UseSpeechSynthesisOptions) {
     if (!section) return;
 
     speakSection(section, nextIndex, () => {
+      // eslint-disable-next-line react-hooks/immutability
       advanceQueue();
     });
   }, [speakSection, options]);

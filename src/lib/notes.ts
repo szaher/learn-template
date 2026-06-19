@@ -1,4 +1,4 @@
-import { storageKeys } from "../../../academy.config";
+import { storageKeys } from "../../academy.config";
 
 function noteKey(moduleId: number, lessonSlug: string): string {
   return `${moduleId}:${lessonSlug}`;
