@@ -45,4 +45,5 @@ export const storageKeys = {
   notes: `${academy.slug}-notes`,
   chat: `${academy.slug}-chat`,
   theme: `${academy.slug}-theme`,
+  ttsVoice: `${academy.slug}-tts-voice`,
 } as const;
