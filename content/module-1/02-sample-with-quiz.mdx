@@ -1,0 +1,54 @@
+---
+title: "Concepts and quizzes"
+quiz:
+  - question: "What is the primary purpose of a comparison diagram?"
+    options:
+      - "Showing two approaches or systems side by side"
+      - "Displaying a timeline of events"
+      - "Rendering a pie chart"
+    correctIndex: 0
+  - question: "Which of the following is NOT a valid Mermaid graph direction?"
+    options:
+      - "TD (top-down)"
+      - "LR (left-right)"
+      - "DU (diagonal-up)"
+    correctIndex: 2
+  - question: "In the comparison table below, which row describes 'Scalability'?"
+    options:
+      - "First row"
+      - "Third row"
+      - "Second row"
+    correctIndex: 1
+---
+
+## Comparison diagram
+
+The diagram below uses two **subgraphs** placed in a `graph LR` layout to compare two approaches side by side.
+
+<MermaidDiagram chart={`graph LR
+    subgraph ApproachA["Approach A"]
+        A1[Simple Setup] --> A2[Manual Scaling]
+        A2 --> A3[Lower Cost]
+    end
+    subgraph ApproachB["Approach B"]
+        B1[Complex Setup] --> B2[Auto Scaling]
+        B2 --> B3[Higher Cost]
+    end
+    style ApproachA fill:#ebf8ff,stroke:#3182ce
+    style ApproachB fill:#fefcbf,stroke:#d69e2e
+`} />
+
+## Feature comparison
+
+The table below compares the two approaches across several dimensions.
+
+| Dimension     | Approach A          | Approach B            |
+|---------------|---------------------|-----------------------|
+| Setup         | Simple, minimal     | Complex, configurable |
+| Scalability   | Manual intervention | Automatic, elastic    |
+| Cost          | Lower baseline      | Pay-per-use, variable |
+| Best for      | Small workloads     | Large-scale systems   |
+
+## When to use each
+
+Choose the approach that matches your requirements. Approach A suits teams that value **simplicity** and predictable costs. Approach B is better when **automatic scaling** and higher throughput are critical.

@@ -1,0 +1,107 @@
+---
+title: "Your first lesson"
+quiz:
+  - question: "Which component is used to render syntax-highlighted code in a lesson?"
+    options:
+      - "MarkdownCode"
+      - "CodeBlock"
+      - "SyntaxHighlighter"
+      - "CodeSnippet"
+    correctIndex: 1
+  - question: "What diagram syntax does MermaidDiagram use?"
+    options:
+      - "PlantUML"
+      - "Graphviz DOT"
+      - "Mermaid"
+    correctIndex: 2
+---
+
+## Overview
+
+Welcome to your first lesson. This file is a **format reference** that demonstrates every MDX component and content pattern available in the Academy template. Use it as a starting point when writing your own lessons.
+
+Each lesson is an `.mdx` file that combines standard Markdown with custom React components. The **frontmatter** block above defines the title and an optional quiz array that powers the interactive quiz section at the bottom of the lesson.
+
+## Architecture diagram
+
+Use the `MermaidDiagram` component to embed diagrams directly in your lesson. The `graph TD` direction renders a top-down layout, and **subgraphs** let you group related nodes.
+
+<MermaidDiagram chart={`graph TD
+    subgraph Input["Input Layer"]
+        A[Raw Content] --> B[Parser]
+    end
+    subgraph Processing["Processing Layer"]
+        B --> C[Validator]
+        C --> D[Transformer]
+    end
+    subgraph Output["Output Layer"]
+        D --> E[Renderer]
+        E --> F[Final Output]
+    end
+    style Input fill:#e2e8f0,stroke:#4a5568
+    style Processing fill:#ebf8ff,stroke:#3182ce
+    style Output fill:#f0fff4,stroke:#38a169
+`} />
+
+## Data flow diagram
+
+A `graph LR` layout is useful for showing sequential data flows or pipelines. Each arrow can carry a label to describe the transformation between stages.
+
+<MermaidDiagram chart={`graph LR
+    Source[Data Source] -->|fetch| Ingest[Ingestion]
+    Ingest -->|validate| Clean[Cleaning]
+    Clean -->|transform| Enrich[Enrichment]
+    Enrich -->|load| Store[Data Store]
+    Store -->|query| API[API Layer]
+    API -->|respond| Client[Client App]
+    style Source fill:#fefcbf,stroke:#d69e2e
+    style Store fill:#c6f6d5,stroke:#38a169
+    style Client fill:#bee3f8,stroke:#3182ce
+`} />
+
+## Code example
+
+The `CodeBlock` component renders syntax-highlighted code with an optional filename tab. Set the `language` prop to enable the correct highlighter and `filename` to display a header.
+
+<CodeBlock code={`# example.py — A minimal processing function
+
+def process(items: list[str]) -> list[str]:
+    """Clean, validate, and return processed items."""
+    results = []
+    for item in items:
+        cleaned = item.strip().lower()
+        if cleaned:
+            results.append(cleaned)
+    return results
+
+
+if __name__ == "__main__":
+    sample = ["  Hello ", "WORLD", "", "  foo  "]
+    print(process(sample))
+    # Output: ['hello', 'world', 'foo']
+`} language="python" filename="example.py" />
+
+## Key concepts
+
+Below is a bulleted list summarizing the main components you can use in any lesson:
+
+- **MermaidDiagram** -- renders Mermaid charts inline with support for all diagram types
+- **CodeBlock** -- displays syntax-highlighted code with a filename header
+- **Frontmatter quiz** -- defines interactive multiple-choice questions in YAML
+- **Standard Markdown** -- headings, lists, tables, blockquotes, and inline formatting all work as expected
+
+## Step-by-step workflow
+
+When creating a new lesson, follow these steps:
+
+1. Create a new `.mdx` file in the appropriate module folder
+2. Add frontmatter with at least a `title` field
+3. Write your content using `##` section headings
+4. Embed diagrams and code blocks where they add clarity
+5. Add quiz questions to the frontmatter to reinforce learning
+
+> **Tip:** Keep each lesson focused on a single concept. Shorter lessons with clear diagrams and a quick quiz are more effective than long, dense pages.
+
+## Summary
+
+This lesson demonstrated every content pattern the template supports: section headings, bold key terms, architecture and flow diagrams, code blocks, bulleted and numbered lists, and blockquotes. Use this file as a reference whenever you need to check the syntax for a particular component.

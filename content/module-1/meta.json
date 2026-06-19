@@ -1,0 +1,26 @@
+{
+  "id": 1,
+  "title": "Getting Started",
+  "description": "Introduction to the core concepts and your first hands-on exercise",
+  "color": "#68d391",
+  "lessons": [
+    {
+      "slug": "01-sample-lesson",
+      "title": "Your first lesson",
+      "description": "A sample lesson demonstrating all available MDX components",
+      "estimatedMinutes": 10,
+      "diagramTypes": ["architecture", "flowchart"],
+      "hasCode": true,
+      "hasQuiz": true
+    },
+    {
+      "slug": "02-sample-with-quiz",
+      "title": "Concepts and quizzes",
+      "description": "A sample lesson focused on quizzes and comparison diagrams",
+      "estimatedMinutes": 8,
+      "diagramTypes": ["comparison"],
+      "hasCode": false,
+      "hasQuiz": true
+    }
+  ]
+}
