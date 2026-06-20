@@ -15,7 +15,12 @@ interface ChatInterfaceProps {
 function loadHistory(): ChatMessageType[] {
   if (typeof localStorage === "undefined") return [];
   const raw = localStorage.getItem(storageKeys.chat);
-  return raw ? JSON.parse(raw) : [];
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
 }
 
 function saveHistory(messages: ChatMessageType[]) {
@@ -179,7 +184,9 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || streaming}
-            className="px-3 py-1.5 text-sm rounded-lg bg-[var(--accent-blue)] text-white disabled:opacity-40 hover:opacity-90 transition-opacity"
+            aria-busy={streaming}
+            aria-label={streaming ? "Waiting for response" : "Send message"}
+            className="px-3 py-1.5 text-sm rounded-lg bg-[var(--accent-blue)] text-white disabled:opacity-40 hover:opacity-90 transition-opacity focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-secondary)]"
           >
             {streaming ? "..." : "Send"}
           </button>

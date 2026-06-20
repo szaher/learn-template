@@ -209,7 +209,7 @@ export default function LessonContent({
             </div>
           </div>
 
-          <div ref={contentRef} className="prose prose-invert max-w-none relative">
+          <div ref={contentRef} className="prose max-w-none relative">
             {children}
 
             {sections.map((section, i) => (

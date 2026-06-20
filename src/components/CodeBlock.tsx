@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 const Editor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
@@ -25,6 +25,18 @@ function extractText(node: React.ReactNode): string {
 export default function CodeBlock({ code, language = "python", filename, children }: CodeBlockProps) {
   const codeText = code || extractText(children) || "";
   const [copied, setCopied] = useState(false);
+  const [editorTheme, setEditorTheme] = useState<"vs-dark" | "vs">(() =>
+    typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "light" ? "vs" : "vs-dark"
+  );
+
+  useEffect(() => {
+    const resolve = () =>
+      setEditorTheme(document.documentElement.getAttribute("data-theme") === "light" ? "vs" : "vs-dark");
+    const observer = new MutationObserver(resolve);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => observer.disconnect();
+  }, []);
+
   const lineCount = codeText.split("\n").length;
   const height = Math.min(Math.max(lineCount * 20 + 20, 80), 500);
 
@@ -51,7 +63,7 @@ export default function CodeBlock({ code, language = "python", filename, childre
         height={height}
         language={language}
         value={codeText}
-        theme="vs-dark"
+        theme={editorTheme}
         options={{
           readOnly: true,
           minimap: { enabled: false },

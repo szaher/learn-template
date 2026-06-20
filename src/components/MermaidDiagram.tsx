@@ -81,10 +81,9 @@ export default function MermaidDiagram({ chart, fallback, children }: MermaidDia
   const id = useId().replace(/:/g, "-");
   const [svgHtml, setSvgHtml] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">(getResolvedTheme);
 
   useEffect(() => {
-    setTheme(getResolvedTheme());
     const observer = new MutationObserver(() => setTheme(getResolvedTheme()));
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     return () => observer.disconnect();
