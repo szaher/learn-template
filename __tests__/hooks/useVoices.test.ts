@@ -67,6 +67,7 @@ const mockLocalStorage = {
 beforeEach(() => {
   storage = {};
   voicesChangedListeners = [];
+  document.documentElement.lang = "en";
   mockSpeechSynthesis.getVoices.mockReturnValue([]);
   vi.stubGlobal("speechSynthesis", mockSpeechSynthesis);
   vi.stubGlobal("localStorage", mockLocalStorage);
@@ -82,12 +83,13 @@ afterEach(() => {
 // ── Tests ───────────────────────────────────────────────────────
 
 describe("useVoices", () => {
-  it("loads voices from initial getVoices()", () => {
+  it("loads voices from initial getVoices() filtered to content language", () => {
     mockSpeechSynthesis.getVoices.mockReturnValue(VOICES);
 
     const { result } = renderHook(() => useVoices());
 
-    expect(result.current.voices.length).toBe(4);
+    // 4 total voices, 2 English — filtered to en
+    expect(result.current.voices.length).toBe(2);
   });
 
   it("updates voices on voiceschanged event", () => {
@@ -101,16 +103,28 @@ describe("useVoices", () => {
       voicesChangedListeners.forEach((fn) => fn());
     });
 
-    expect(result.current.voices.length).toBe(4);
+    expect(result.current.voices.length).toBe(2);
   });
 
-  it("sorts voices by language then name", () => {
+  it("filters voices to match content language", () => {
     mockSpeechSynthesis.getVoices.mockReturnValue(VOICES);
 
     const { result } = renderHook(() => useVoices());
     const names = result.current.voices.map((v) => v.voice.name);
 
-    expect(names).toEqual(["Anna", "Alex", "Samantha", "Thomas"]);
+    // Only en voices shown when document lang is "en"
+    expect(names).toEqual(["Alex", "Samantha"]);
+    expect(result.current.contentLang).toBe("en");
+  });
+
+  it("shows all matching voices for a different content language", () => {
+    document.documentElement.lang = "fr";
+    mockSpeechSynthesis.getVoices.mockReturnValue(VOICES);
+
+    const { result } = renderHook(() => useVoices());
+    const names = result.current.voices.map((v) => v.voice.name);
+
+    expect(names).toEqual(["Thomas"]);
   });
 
   it("persists selected voice by voiceURI", () => {

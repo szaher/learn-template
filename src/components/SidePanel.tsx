@@ -20,6 +20,7 @@ interface SidePanelProps {
   onCycleSpeed: () => void;
   isPlaying: boolean;
   isSpeechSupported: boolean;
+  contentLang: string;
 }
 
 const TABS: Array<{ id: SidePanelTab; label: string }> = [
@@ -42,6 +43,7 @@ export default function SidePanel({
   onCycleSpeed,
   isPlaying,
   isSpeechSupported,
+  contentLang,
 }: SidePanelProps) {
   // ── Notes state ──────────────────────────────────────────────
 
@@ -231,7 +233,7 @@ export default function SidePanel({
                   ))}
                 </select>
                 <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                  Choose a system voice for narration.
+                  Showing {contentLang.toUpperCase()} voices for this content.
                 </p>
               </div>
 

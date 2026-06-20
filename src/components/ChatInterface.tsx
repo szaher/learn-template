@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChatMessage as ChatMessageType } from "@/types";
 import ChatMessage from "./ChatMessage";
 import { academy, storageKeys } from "../../academy.config";
@@ -26,14 +26,27 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
 
   useEffect(() => {
     setMessages(loadHistory());
   }, []);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottom.current = distanceFromBottom < 80;
+  }, []);
+
+  useLayoutEffect(() => {
+    if (stickToBottom.current) {
+      const el = scrollRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
   }, [messages]);
 
   const sendMessage = useCallback(
@@ -54,8 +67,8 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
         timestamp: new Date().toISOString(),
       };
 
-      const updated = [...messages, userMsg, assistantMsg];
-      setMessages(updated);
+      const history = messagesRef.current.slice(-10);
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
       setInput("");
       setStreaming(true);
 
@@ -67,7 +80,7 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
             message: text.trim(),
             context: {
               ...initialContext,
-              history: messages.slice(-10),
+              history,
             },
           }),
         });
@@ -126,7 +139,7 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
         setStreaming(false);
       }
     },
-    [messages, streaming, initialContext]
+    [streaming, initialContext]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -138,7 +151,7 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-6 py-4">
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-[var(--text-secondary)]">
             <div className="text-center">
@@ -150,7 +163,6 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
         {messages.map((msg) => (
           <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
         ))}
-        <div ref={bottomRef} />
       </div>
 
       <div className="p-4 border-t border-[var(--border)]">

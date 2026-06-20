@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { storageKeys } from "../../academy.config";
 
 export interface VoiceInfo {
@@ -31,8 +31,19 @@ function writeStoredVoice(voiceURI: string | null) {
   }
 }
 
+const noopSubscribe = () => () => {};
+
+function getContentLang(): string {
+  return document.documentElement.lang?.split("-")[0]?.toLowerCase() || "en";
+}
+
+function getServerLang(): string {
+  return "en";
+}
+
 export function useVoices() {
-  const [voices, setVoices] = useState<VoiceInfo[]>([]);
+  const [allVoices, setAllVoices] = useState<VoiceInfo[]>([]);
+  const contentLang = useSyncExternalStore(noopSubscribe, getContentLang, getServerLang);
   const [selectedVoiceURI, setSelectedVoiceURI] = useState<string | null>(
     readStoredVoice,
   );
@@ -49,21 +60,19 @@ export function useVoices() {
       const mapped: VoiceInfo[] = raw.map((v) => ({
         voice: v,
         label: `${v.name} (${v.lang})`,
-        langGroup: v.lang.split("-")[0],
+        langGroup: v.lang.split("-")[0].toLowerCase(),
       }));
       mapped.sort((a, b) => {
         const langCmp = a.langGroup.localeCompare(b.langGroup);
         if (langCmp !== 0) return langCmp;
         return a.voice.name.localeCompare(b.voice.name);
       });
-      setVoices(mapped);
+      setAllVoices(mapped);
     }
 
     loadVoices();
     window.speechSynthesis.addEventListener("voiceschanged", loadVoices);
 
-    // Some browsers populate voices asynchronously without firing
-    // voiceschanged. Retry a few times to catch late arrivals.
     let retries = 0;
     const retryTimer = setInterval(() => {
       retries++;
@@ -83,6 +92,8 @@ export function useVoices() {
     };
   }, []);
 
+  const voices = allVoices.filter((v) => v.langGroup === contentLang);
+
   const selectedVoice: SpeechSynthesisVoice | null =
     voices.find((v) => v.voice.voiceURI === selectedVoiceURI)?.voice ??
     null;
@@ -93,5 +104,5 @@ export function useVoices() {
     writeStoredVoice(uri);
   }, []);
 
-  return { voices, selectedVoice, selectedVoiceURI, selectVoice };
+  return { voices, selectedVoice, selectedVoiceURI, selectVoice, contentLang };
 }

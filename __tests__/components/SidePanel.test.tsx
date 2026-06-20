@@ -27,6 +27,7 @@ function renderPanel(overrides: Partial<Parameters<typeof SidePanel>[0]> = {}) {
     onCycleSpeed: vi.fn(),
     isPlaying: false,
     isSpeechSupported: true,
+    contentLang: "en",
   };
   return render(<SidePanel {...defaults} {...overrides} />);
 }

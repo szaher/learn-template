@@ -10,6 +10,54 @@ export type SourceQuality =
 
 export type ClaimStatus = "verified" | "verify" | "unsupported";
 
+// ── Canonical constants (single source of truth for enums) ─────
+
+export const CONTENT_VOICES = [
+  "conversational",
+  "academic",
+  "systematic",
+  "narrative",
+  "minimalist",
+] as const;
+
+export const INSTRUCTIONAL_APPROACHES = [
+  "socratic",
+  "problem-based",
+  "hands-on",
+  "analogical",
+  "visual-first",
+  "challenge-based",
+] as const;
+
+export const GENERATION_MODES = ["sequential", "parallel"] as const;
+
+export const MULTIMEDIA_TYPES = [
+  "slides",
+  "narration",
+  "mermaid",
+  "mind-map",
+  "infographic",
+  "timeline",
+  "comparison-matrix",
+  "decision-tree",
+  "concept-map",
+  "interactive-simulation",
+] as const;
+
+export const ARTIFACT_STATUSES = [
+  "planned",
+  "generated",
+  "approved",
+] as const;
+
+// ── Derived union types ────────────────────────────────────────
+
+export type ContentVoice = (typeof CONTENT_VOICES)[number];
+export type InstructionalApproach = (typeof INSTRUCTIONAL_APPROACHES)[number];
+export type GenerationMode = (typeof GENERATION_MODES)[number];
+export type MultimediaType = (typeof MULTIMEDIA_TYPES)[number];
+export type ArtifactStatus = (typeof ARTIFACT_STATUSES)[number];
+
 export interface TutorialReference {
   id: string;
   title: string;
@@ -79,6 +127,151 @@ export interface ExerciseAnswer {
   rubric?: string[];
 }
 
+// ── Content style ──────────────────────────────────────────────
+
+export interface ContentStyle {
+  voice?: ContentVoice;
+  approaches?: InstructionalApproach[];
+  generationMode?: GenerationMode;
+}
+
+// ── Artifact descriptor ────────────────────────────────────────
+
+export interface ArtifactAccessibility {
+  altText?: string;
+  transcriptPath?: string;
+  captionsPath?: string;
+  fallbackText: string;
+}
+
+export interface ArtifactDescriptor {
+  id: string;
+  type: MultimediaType;
+  status: ArtifactStatus;
+  sourcePath?: string;
+  renderedPath?: string;
+  objectiveIds: string[];
+  accessibility: ArtifactAccessibility;
+}
+
+// ── Gamification ───────────────────────────────────────────────
+
+export interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  criteria: string;
+  iconHint: string;
+}
+
+export interface PointRule {
+  action: string;
+  points: number;
+  description: string;
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  unlocksLessonIds?: string[];
+}
+
+export interface GamificationConfig {
+  enabled: boolean;
+  badges?: Badge[];
+  pointRules?: PointRule[];
+  streakTracking?: boolean;
+  achievements?: Achievement[];
+  unlockableContent?: string[];
+}
+
+// ── Adaptive and spaced learning ───────────────────────────────
+
+export interface AdaptivePath {
+  id: string;
+  title: string;
+  description: string;
+  entryCondition: string;
+  lessonSequence: string[];
+  difficulty: Difficulty;
+}
+
+export interface SpacedRepetitionConfig {
+  enabled: boolean;
+  intervals: number[];
+  reviewCardCount: number;
+}
+
+export interface MicrolearningConfig {
+  enabled: boolean;
+  maxMinutesPerModule: number;
+  digestFormat: "flashcard" | "summary" | "quiz";
+}
+
+// ── Project capstones ──────────────────────────────────────────
+
+export interface ProjectCapstone {
+  id: string;
+  title: string;
+  description: string;
+  deliverables: string[];
+  rubric: string[];
+  estimatedHours: number;
+  prerequisiteLessonIds: string[];
+  conceptIds: string[];
+}
+
+// ── Scaffolding and pedagogy ───────────────────────────────────
+
+export interface ScaffoldingConfig {
+  hintLevels: number;
+  differentiatedPaths: boolean;
+  graduatedComplexity: boolean;
+}
+
+export interface UDLFramework {
+  multipleRepresentations: string[];
+  multipleActions: string[];
+  multipleEngagement: string[];
+}
+
+export interface MetacognitionStrategy {
+  type: "self-assessment" | "reflection" | "goal-setting" | "knowledge-monitoring";
+  prompt: string;
+  placement: "before-lesson" | "mid-lesson" | "after-lesson";
+}
+
+// ── Multimedia planning ────────────────────────────────────────
+
+export interface MultimediaRecommendation {
+  id: string;
+  type: MultimediaType;
+  rationale: string;
+  priority: "required" | "recommended" | "optional";
+  placement: string;
+  contentBrief: string;
+  accessibilityNotes: string;
+  objectiveIds?: string[];
+  mermaidSource?: string;
+  estimatedEffort: "low" | "medium" | "high";
+}
+
+export interface MultimediaPlan {
+  recommendations: MultimediaRecommendation[];
+}
+
+// ── Collaborative learning ─────────────────────────────────────
+
+export interface CollaborativeConfig {
+  enabled: boolean;
+  groupSize?: number;
+  activities?: string[];
+  peerReviewEnabled?: boolean;
+}
+
+// ── Assessment ─────────────────────────────────────────────────
+
 export interface AssessmentItem {
   id: string;
   type: "quiz" | "free-response" | "performance-task" | "self-check";
@@ -121,8 +314,13 @@ export interface LessonSpec {
   objectiveIds: string[];
   conceptIds: string[];
   referenceIds: string[];
+  dependsOnLessonIds?: string[];
+  multimediaPlan?: MultimediaPlan;
+  metacognition?: MetacognitionStrategy[];
+  scaffolding?: ScaffoldingConfig;
   artifacts: {
     mdxPath: string;
+    items?: ArtifactDescriptor[];
     slidesPath?: string;
     narrationScriptPath?: string;
     infographicPath?: string;
@@ -130,7 +328,7 @@ export interface LessonSpec {
 }
 
 export interface TutorialSpec {
-  schemaVersion: "1.0.0";
+  schemaVersion: "1.0.0" | "1.1.0";
   id: string;
   title: string;
   description: string;
@@ -151,6 +349,14 @@ export interface TutorialSpec {
   nextSteps: string[];
   accessibility: AccessibilityMetadata;
   localization: LocalizationMetadata;
+  contentStyle?: ContentStyle;
+  gamification?: GamificationConfig;
+  adaptivePaths?: AdaptivePath[];
+  spacedRepetition?: SpacedRepetitionConfig;
+  microlearning?: MicrolearningConfig;
+  projectCapstones?: ProjectCapstone[];
+  udlFramework?: UDLFramework;
+  collaborativeLearning?: CollaborativeConfig;
 }
 
 export interface ValidationIssue {

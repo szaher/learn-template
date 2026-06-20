@@ -84,7 +84,8 @@ function validateTutorialSpec(file, spec) {
   for (const key of required) {
     if (!(key in spec)) add("error", file, `Missing required field '${key}'.`);
   }
-  if (spec.schemaVersion !== "1.0.0") add("error", file, "schemaVersion must be 1.0.0.");
+  const VALID_VERSIONS = ["1.0.0", "1.1.0"];
+  if (!VALID_VERSIONS.includes(spec.schemaVersion)) add("error", file, `schemaVersion must be one of: ${VALID_VERSIONS.join(", ")}.`);
 
   const objectiveIds = ids(spec.learningObjectives);
   const assessmentIds = ids(spec.formativeAssessment);
@@ -115,6 +116,130 @@ function validateTutorialSpec(file, spec) {
   }
   for (const item of spec.answers ?? []) {
     if (!exerciseIds.has(item.exerciseId)) add("error", file, `Answer '${item.id}' references missing exercise '${item.exerciseId}'.`);
+  }
+
+  // ── Enhancement field validation ────────────────────────────
+
+  const CONTENT_VOICES = ["conversational", "academic", "systematic", "narrative", "minimalist"];
+  const INSTRUCTIONAL_APPROACHES = ["socratic", "problem-based", "hands-on", "analogical", "visual-first", "challenge-based"];
+  const GENERATION_MODES = ["sequential", "parallel"];
+  const MULTIMEDIA_TYPES = ["slides", "narration", "mermaid", "mind-map", "infographic", "timeline", "comparison-matrix", "decision-tree", "concept-map", "interactive-simulation"];
+  const ARTIFACT_STATUSES = ["planned", "generated", "approved"];
+
+  const lessonIdSet = ids(spec.lessons);
+
+  if (spec.contentStyle) {
+    if (spec.contentStyle.voice && !CONTENT_VOICES.includes(spec.contentStyle.voice)) {
+      add("error", file, `Invalid content voice '${spec.contentStyle.voice}'.`);
+    }
+    if (spec.contentStyle.generationMode && !GENERATION_MODES.includes(spec.contentStyle.generationMode)) {
+      add("error", file, `Invalid generation mode '${spec.contentStyle.generationMode}'.`);
+    }
+    if (Array.isArray(spec.contentStyle.approaches)) {
+      for (const approach of spec.contentStyle.approaches) {
+        if (!INSTRUCTIONAL_APPROACHES.includes(approach)) {
+          add("error", file, `Invalid instructional approach '${approach}'.`);
+        }
+      }
+    }
+  }
+
+  for (const lesson of spec.lessons ?? []) {
+    if (Array.isArray(lesson.dependsOnLessonIds)) {
+      for (const dep of lesson.dependsOnLessonIds) {
+        if (!lessonIdSet.has(dep)) add("error", file, `Lesson '${lesson.id}' depends on unknown lesson '${dep}'.`);
+        if (dep === lesson.id) add("error", file, `Lesson '${lesson.id}' has a self-dependency.`);
+      }
+    }
+    if (Array.isArray(lesson.artifacts?.items)) {
+      for (const ad of lesson.artifacts.items) {
+        if (!MULTIMEDIA_TYPES.includes(ad.type)) add("error", file, `Lesson '${lesson.id}' artifact has invalid type '${ad.type}'.`);
+        if (!ARTIFACT_STATUSES.includes(ad.status)) add("error", file, `Lesson '${lesson.id}' artifact has invalid status '${ad.status}'.`);
+        if (!ad.accessibility?.fallbackText) add("error", file, `Lesson '${lesson.id}' artifact '${ad.id}' is missing accessibility.fallbackText.`);
+      }
+    }
+  }
+
+  // Dependency cycle detection
+  const depGraph = new Map();
+  for (const lesson of spec.lessons ?? []) {
+    depGraph.set(lesson.id, Array.isArray(lesson.dependsOnLessonIds) ? lesson.dependsOnLessonIds : []);
+  }
+  const visited = new Set();
+  const inStack = new Set();
+  function hasCycle(nodeId) {
+    if (inStack.has(nodeId)) return true;
+    if (visited.has(nodeId)) return false;
+    visited.add(nodeId);
+    inStack.add(nodeId);
+    for (const dep of depGraph.get(nodeId) ?? []) {
+      if (hasCycle(dep)) return true;
+    }
+    inStack.delete(nodeId);
+    return false;
+  }
+  for (const id of depGraph.keys()) {
+    if (hasCycle(id)) {
+      add("error", file, `Dependency cycle detected involving lesson '${id}'.`);
+      break;
+    }
+  }
+
+  // Generation mode compliance
+  if (spec.contentStyle?.generationMode === "sequential") {
+    const orderedIds = (spec.lessons ?? []).map((l) => l.id);
+    for (let i = 1; i < orderedIds.length; i++) {
+      const deps = spec.lessons[i].dependsOnLessonIds ?? [];
+      if (!deps.includes(orderedIds[i - 1])) {
+        add("error", file, `Sequential mode: lesson '${orderedIds[i]}' must depend on predecessor '${orderedIds[i - 1]}'.`);
+      }
+    }
+  } else if (spec.contentStyle?.generationMode === "parallel") {
+    for (const lesson of spec.lessons ?? []) {
+      if (Array.isArray(lesson.dependsOnLessonIds) && lesson.dependsOnLessonIds.length > 0) {
+        add("error", file, `Parallel mode: lesson '${lesson.id}' must not have dependency edges.`);
+      }
+    }
+  }
+
+  // Gamification validation
+  if (spec.gamification?.enabled) {
+    if (!Array.isArray(spec.gamification.badges) || spec.gamification.badges.length === 0) {
+      add("warning", file, "Gamification enabled but no badges defined.");
+    }
+    for (const ach of spec.gamification.achievements ?? []) {
+      for (const lid of ach.unlocksLessonIds ?? []) {
+        if (!lessonIdSet.has(lid)) add("error", file, `Achievement '${ach.id}' references unknown lesson '${lid}'.`);
+      }
+    }
+  }
+
+  // Adaptive paths validation
+  for (const ap of spec.adaptivePaths ?? []) {
+    for (const lid of ap.lessonSequence ?? []) {
+      if (!lessonIdSet.has(lid)) add("error", file, `Adaptive path '${ap.id}' references unknown lesson '${lid}'.`);
+    }
+  }
+
+  // Project capstone validation
+  for (const cap of spec.projectCapstones ?? []) {
+    for (const lid of cap.prerequisiteLessonIds ?? []) {
+      if (!lessonIdSet.has(lid)) add("error", file, `Capstone '${cap.id}' references unknown lesson '${lid}'.`);
+    }
+    validateRefs(file, cap.conceptIds ?? [], conceptIds, "concept");
+  }
+
+  // UDL framework validation
+  if (spec.udlFramework) {
+    if (Array.isArray(spec.udlFramework.multipleRepresentations) && spec.udlFramework.multipleRepresentations.length < 2) {
+      add("warning", file, "UDL framework should include at least 2 representation modes.");
+    }
+    if (Array.isArray(spec.udlFramework.multipleActions) && spec.udlFramework.multipleActions.length < 2) {
+      add("warning", file, "UDL framework should include at least 2 action modes.");
+    }
+    if (Array.isArray(spec.udlFramework.multipleEngagement) && spec.udlFramework.multipleEngagement.length < 2) {
+      add("warning", file, "UDL framework should include at least 2 engagement modes.");
+    }
   }
 }
 

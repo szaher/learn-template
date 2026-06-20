@@ -2,6 +2,7 @@ export type GenerationStageId =
   | "topic-decomposition"
   | "research-source-plan"
   | "lesson-outline"
+  | "multimedia-blueprint"
   | "artifact-generation"
   | "structured-validation"
   | "mdx-compilation"
@@ -23,8 +24,8 @@ export const generationPipeline: GenerationStage[] = [
     title: "Topic Decomposition and Curriculum Map",
     purpose: "Break the tutorial topic into prerequisite-aware lessons and concept dependencies.",
     inputs: ["topic brief", "audience profile", "scope and non-goals"],
-    outputs: ["curriculum map JSON", "concept graph", "lesson sequence"],
-    gates: ["all objectives map to at least one lesson", "prerequisites are stated before use"],
+    outputs: ["curriculum map JSON", "concept graph", "lesson sequence", "content style configuration", "gamification plan", "adaptive path definitions"],
+    gates: ["all objectives map to at least one lesson", "prerequisites are stated before use", "content voice and generation mode declared"],
     reviewerRequired: true,
   },
   {
@@ -40,18 +41,27 @@ export const generationPipeline: GenerationStage[] = [
     id: "lesson-outline",
     title: "Lesson Outline Generation",
     purpose: "Create lesson-level scaffolds with objectives, examples, exercises, recap, and assessment.",
-    inputs: ["curriculum map JSON", "reference inventory"],
-    outputs: ["lesson outline JSON"],
-    gates: ["one assessment per objective", "worked examples precede independent exercises"],
+    inputs: ["curriculum map JSON", "reference inventory", "content style configuration"],
+    outputs: ["lesson outline JSON", "metacognition strategies per lesson"],
+    gates: ["one assessment per objective", "worked examples precede independent exercises", "voice-consistent language throughout", "scaffolding present for differentiated instruction"],
+    reviewerRequired: false,
+  },
+  {
+    id: "multimedia-blueprint",
+    title: "Multimedia Blueprint",
+    purpose: "Analyze lesson outlines to plan media types, placements, and accessibility strategies for each lesson.",
+    inputs: ["lesson outline JSON", "content style configuration", "reference inventory", "accessibility requirements"],
+    outputs: ["per-lesson multimedia plans", "UDL coverage report"],
+    gates: ["every lesson has at least one multimedia recommendation", "accessibility notes provided for all items", "UDL coverage includes at least two representation modes"],
     reviewerRequired: false,
   },
   {
     id: "artifact-generation",
     title: "Artifact-Specific Generation",
     purpose: "Generate MDX, quizzes, diagrams, narration scripts, mind maps, slides, and infographics.",
-    inputs: ["lesson outline JSON", "approved source excerpts"],
-    outputs: ["MDX files", "frontmatter quiz data", "diagram source", "narration hooks"],
-    gates: ["all citations resolve", "diagrams include fallbacks", "media has accessibility metadata"],
+    inputs: ["lesson outline JSON", "approved source excerpts", "per-lesson multimedia plans", "gamification config"],
+    outputs: ["MDX files", "frontmatter quiz data", "diagram source", "narration hooks", "flashcard sets", "gamification elements"],
+    gates: ["all citations resolve", "diagrams include fallbacks", "media has accessibility metadata", "spaced repetition flashcards generated when enabled", "gamification elements consistent with config"],
     reviewerRequired: false,
   },
   {
@@ -60,7 +70,7 @@ export const generationPipeline: GenerationStage[] = [
     purpose: "Validate JSON outputs, cross-references, coverage, unsupported claims, and duplicates.",
     inputs: ["tutorial spec JSON", "generated artifacts"],
     outputs: ["validation report"],
-    gates: ["schema validation passes", "claim and citation checks pass"],
+    gates: ["schema validation passes", "claim and citation checks pass", "voice consistency validated", "UDL coverage meets minimums", "gamification integrity check passes"],
     reviewerRequired: false,
   },
   {

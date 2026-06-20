@@ -6,9 +6,25 @@ Start with `prompts/01-curriculum-design.md` and produce a `TutorialSpec` JSON f
 
 The spec must include audience, prerequisites, learning objectives, scope, non-goals, lesson sequence, references, concepts, misconceptions, examples, exercises, answers, assessment, mastery criteria, recap, next steps, accessibility metadata, and localization metadata.
 
+## 1b. Configure Content Style (Optional, v1.1.0)
+
+Set the content style in the tutorial spec:
+
+- **Voice** (pick one): `conversational`, `academic`, `systematic` (default), `narrative`, `minimalist`.
+- **Instructional approaches** (pick one or more): `socratic`, `problem-based`, `hands-on`, `analogical`, `visual-first`, `challenge-based`.
+- **Generation mode**: `sequential` (default, lessons depend on predecessors) or `parallel` (independent lessons).
+
+Enable optional enhancements: `gamification`, `adaptivePaths`, `spacedRepetition`, `microlearning`, `projectCapstones`, `udlFramework`, `collaborativeLearning`. Set `schemaVersion` to `"1.1.0"` when using any of these.
+
 ## 2. Plan Sources
 
 Use primary, official, or peer-reviewed sources where possible. Label every source with a quality value and mark unstable or unsupported claims for verification.
+
+## 2b. Plan Multimedia (Optional, v1.1.0)
+
+Use `prompts/08-multimedia-planning.md` to generate a multimedia blueprint for each lesson after lesson outlines are ready. This step recommends which visual, audio, and interactive elements to include based on content patterns, voice, and instructional approaches.
+
+The blueprint output feeds into artifact generation (step 3).
 
 ## 3. Generate Lesson Artifacts
 

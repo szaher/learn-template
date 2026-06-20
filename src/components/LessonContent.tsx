@@ -244,12 +244,12 @@ export default function LessonContent({
 
           <div className="flex items-center justify-between mt-12 pt-6 border-t border-[var(--border)]">
             {prevHref ? (
-              <a
-                href={prevHref}
+              <button
+                onClick={() => router.push(prevHref)}
                 className="text-sm text-[var(--accent-blue)] hover:underline"
               >
                 ← Previous
-              </a>
+              </button>
             ) : (
               <div />
             )}
@@ -292,6 +292,7 @@ export default function LessonContent({
         onCycleSpeed={speech.cycleSpeed}
         isPlaying={speech.isPlaying}
         isSpeechSupported={speech.isSupported}
+        contentLang={voiceState.contentLang}
       />
     </div>
   );

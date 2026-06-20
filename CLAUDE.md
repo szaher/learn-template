@@ -50,12 +50,17 @@ the diff and run `pnpm install`, `pnpm validate`, `pnpm test`, `pnpm lint`, and
 ## Required Flow
 
 1. Define the tutorial with `prompts/01-curriculum-design.md`.
-2. Save a validated `TutorialSpec` JSON file in `content/tutorials/`.
-3. Plan sources and claim coverage before writing lessons.
-4. Generate lesson, assessment, and artifact JSON with `prompts/02-lesson-writing.md`, `prompts/03-quiz-creation.md`, and `prompts/04-presentation-creation.md`.
-5. Move approved MDX into `content/module-N/`.
-6. Run `pnpm validate`, `pnpm test`, `pnpm lint`, and `pnpm build`.
-7. Complete human review for factuality, pedagogy, accessibility, localization, and all `verify` claims.
+2. (Optional) Select content style in the tutorial spec inputs:
+   - **Voice** (pick one): `conversational`, `academic`, `systematic`, `narrative`, `minimalist`.
+   - **Approaches** (pick one or more): `socratic`, `problem-based`, `hands-on`, `analogical`, `visual-first`, `challenge-based`.
+   - **Generation mode**: `sequential` (default, lessons build on each other) or `parallel` (lessons are independent).
+3. Save a validated `TutorialSpec` JSON file in `content/tutorials/`. Use `schemaVersion: "1.1.0"` for specs with enhancement fields, `"1.0.0"` for legacy specs.
+4. Plan sources and claim coverage before writing lessons.
+5. Plan multimedia with `prompts/08-multimedia-planning.md` after lesson outlines are ready.
+6. Generate lesson, assessment, and artifact JSON with `prompts/02-lesson-writing.md`, `prompts/03-quiz-creation.md`, and `prompts/04-presentation-creation.md`.
+7. Move approved MDX into `content/module-N/`.
+8. Run `pnpm validate`, `pnpm test`, `pnpm lint`, and `pnpm build`.
+9. Complete human review for factuality, pedagogy, accessibility, localization, and all `verify` claims.
 
 Use `prompts/07-repair-invalid-output.md` when model output fails schema, MDX, citation, or accessibility checks.
 
@@ -68,7 +73,8 @@ content/
     meta.json                  # Module metadata and lesson manifest
     01-sample-lesson.mdx       # Rendered lesson content
   tutorials/
-    sample-tutorial.json       # TutorialSpec fixture
+    sample-tutorial.json       # TutorialSpec 1.0.0 fixture
+    sample-enhanced-tutorial.json  # TutorialSpec 1.1.0 fixture with enhancements
 docs/
   architecture.md              # System architecture
   authoring-flow.md            # End-to-end authoring workflow
@@ -79,6 +85,7 @@ prompts/
   04-presentation-creation.md  # Rich artifact generation
   05-content-quality.md        # Audit prompt
   07-repair-invalid-output.md  # Repair prompt
+  08-multimedia-planning.md    # Multimedia blueprint per lesson
   schemas/
     tutorial-spec.schema.json  # JSON Schema contract
 scripts/
@@ -95,8 +102,13 @@ Every production tutorial should have a `TutorialSpec` JSON document. It capture
 - Concepts, misconceptions, worked examples, exercises, and answers.
 - Formative assessment, mastery criteria, recap, and next steps.
 - Accessibility and localization metadata.
+- (v1.1.0) Content style (voice, instructional approaches, generation mode).
+- (v1.1.0) Gamification, adaptive paths, spaced repetition, microlearning, project capstones.
+- (v1.1.0) UDL framework, collaborative learning, multimedia plans, scaffolding, metacognition.
 
 The TypeScript contract lives in `src/types/tutorial.ts`; the JSON Schema prompt contract lives in `prompts/schemas/tutorial-spec.schema.json`.
+
+Specs using `schemaVersion: "1.0.0"` are always valid. Enhancement fields require `schemaVersion: "1.1.0"`. The validator accepts both versions.
 
 ## Module Metadata
 
@@ -257,6 +269,13 @@ pnpm build
 - Basic accessibility requirements for images, diagrams, and embeds.
 - Duplicate paragraphs.
 - Risky unsupported-claim wording outside `VerifyClaim`.
+- (v1.1.0) Content style values against canonical voices, approaches, and generation modes.
+- (v1.1.0) Lesson dependency graph: unknown ids, self-references, cycles.
+- (v1.1.0) Generation mode compliance: sequential chain integrity, parallel independence.
+- (v1.1.0) Artifact descriptor types, statuses, and accessibility fallback text.
+- (v1.1.0) Gamification integrity: badge existence, achievement lesson references.
+- (v1.1.0) Adaptive path and project capstone cross-references.
+- (v1.1.0) UDL framework coverage minimums.
 
 ## Naming Conventions
 
@@ -276,6 +295,25 @@ pnpm build
 - Do not use `<div class="mermaid">` in MDX lessons.
 - Do not hardcode academy display text when it belongs in `academy.config.ts`.
 - Do not rely on model fluency as a substitute for validation and review.
+
+## SOTA Educational Practices
+
+The tutorial spec (v1.1.0) supports optional educational enhancements. These are modeled as authoring metadata — runtime features like point tracking or adaptive routing require separate platform work.
+
+| Feature | Authoring-Ready | Needs Runtime Support |
+|---------|----------------|----------------------|
+| **Gamification** — badges, points, streaks, achievements | Config in spec | Points state, badge UI, persistence |
+| **Adaptive paths** — branching lesson sequences by difficulty | Path definitions in spec | Diagnostic signals, route selection |
+| **Spaced repetition** — configurable review intervals | Intervals and card count in spec | Deck format, review scheduler |
+| **Microlearning** — short-form digest modules | Segmentation config in spec | Session segmentation, resume state |
+| **Project capstones** — culminating projects with rubrics | Spec with deliverables and rubric | Submission and grading UI |
+| **Collaborative learning** — peer review, group activities | Config in spec | Backend integration, identity |
+| **Scaffolding** — hints, differentiated paths | Config per lesson | Adaptive hint UI |
+| **UDL framework** — multiple representations, actions, engagement | Coverage metadata | Renderer support per modality |
+| **Metacognition** — self-assessment, reflection, goal-setting | Strategy prompts per lesson | Learner journaling UI |
+| **Interactive simulations** — dynamic explorations | Artifact descriptors | Component registry, sandboxing |
+
+New multimedia types: `timeline`, `comparison-matrix`, `decision-tree`, `concept-map`, `interactive-simulation`. Use `DataTable` for comparison matrices. Use `MermaidDiagram` for decision-trees and concept-maps. Timeline and interactive-simulation require external authoring tools.
 
 ## Optional Book Export
 
