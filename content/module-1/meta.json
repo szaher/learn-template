@@ -6,8 +6,8 @@
   "lessons": [
     {
       "slug": "01-sample-lesson",
-      "title": "Your first lesson",
-      "description": "A sample lesson demonstrating all available MDX components",
+      "title": "Classify Claims and Map Evidence",
+      "description": "Classify generated claims, map each to evidence, and decide whether to publish, verify, or remove",
       "estimatedMinutes": 10,
       "diagramTypes": ["architecture", "flowchart"],
       "hasCode": true,

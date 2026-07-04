@@ -7,7 +7,7 @@ paginate: true
 ---
 
 <script type="module">
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
 mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { primaryColor: "#e0f0ff", primaryTextColor: "#151515", primaryBorderColor: "#0066cc", lineColor: "#0066cc", secondaryColor: "#daf2f2", tertiaryColor: "#f2f2f2", noteBkgColor: "#fef0f0", noteTextColor: "#151515", fontFamily: "Red Hat Text, sans-serif" }});
 </script>
 
@@ -19,6 +19,8 @@ mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { primary
 # Academy Template
 
 ## A Sample Deck for Slide Patterns
+
+**Layout-only sample — all names, data, and comparisons are fictional placeholders.**
 
 Presenter Name | Date
 
@@ -82,9 +84,9 @@ Understanding the fundamentals is essential before moving to advanced topics.
 | Cost           | <span class="vs-bad">Expensive</span> | <span class="vs-good">Cheap</span> | <span class="vs-neutral">Moderate</span> |
 | Maintenance    | <span class="vs-neutral">Medium</span> | <span class="vs-good">Easy</span> | <span class="vs-bad">Difficult</span> |
 
-*Choose the approach that best fits your constraints and requirements.*
+*Illustrative comparison — values are fictional placeholders. Replace with real data before presenting.*
 
-<!-- Speaker note: Walk through each row. Highlight that there is no single best approach. -->
+<!-- Speaker note: Walk through each row. Highlight that there is no single best approach. All values in this table are fictional. -->
 
 ---
 

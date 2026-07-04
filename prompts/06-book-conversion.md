@@ -35,7 +35,9 @@ Every well-structured book has three parts:
 
 ### Print Formatting
 
-| Property | Technical Book Standard |
+These are common starting points for technical books, not universal standards. Adjust for your publisher, audience, and content.
+
+| Property | Common Starting Point |
 |----------|----------------------|
 | Trim size | 7.5 x 9.25" (Crown Quarto) or 6 x 9" |
 | Body font | Serif, 10-11pt (e.g., Linux Libertine, Palatino, Charter) |
@@ -54,6 +56,8 @@ Every well-structured book has three parts:
 - **HTML** — web edition. Built via Pandoc or Quarto. Can host on GitHub Pages.
 
 ### Licensing & Copyright
+
+The text below is a common starting point, not legal advice. Consult a lawyer for your jurisdiction and distribution model before publishing.
 
 ```
 Copyright © {{YEAR}} {{AUTHOR_NAME}}
@@ -320,8 +324,8 @@ After building, verify:
 - [ ] Glossary is alphabetically sorted and terms match bold terms in text
 - [ ] ePub passes `epubcheck` validation (if ePub format requested)
 - [ ] ePub renders correctly in Apple Books or Calibre viewer
-- [ ] Word count is reasonable (technical books: 40,000-80,000 words typical)
-- [ ] Page count is reasonable (150-350 pages for a technical book)
+- [ ] Word count is in a reasonable range for the scope (many technical books fall between 40,000-80,000 words, but shorter or longer is fine)
+- [ ] Page count seems appropriate for the content (150-350 pages is a common range, not a requirement)
 - [ ] No orphaned figures (diagram without caption) or widowed headings (heading at page bottom with content on next page)
 
 ## Pandoc Build Commands Reference

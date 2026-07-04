@@ -104,6 +104,9 @@ function validateTutorialSpec(file, spec) {
     if (lesson.artifacts?.mdxPath && !lesson.artifacts.mdxPath.endsWith(".mdx")) {
       add("error", file, `Lesson '${lesson.id}' mdxPath must point to an .mdx file.`);
     }
+    if (lesson.artifacts?.mdxStatus && !["planned", "generated", "approved"].includes(lesson.artifacts.mdxStatus)) {
+      add("error", file, `Lesson '${lesson.id}' has invalid mdxStatus '${lesson.artifacts.mdxStatus}'.`);
+    }
   }
   for (const item of spec.misconceptions ?? []) validateRefs(file, item.conceptIds, conceptIds, "concept");
   for (const item of spec.workedExamples ?? []) {
@@ -243,6 +246,24 @@ function validateTutorialSpec(file, spec) {
   }
 }
 
+async function validateArtifactPaths(file, spec) {
+  for (const lesson of spec.lessons ?? []) {
+    const mdxStatus = lesson.artifacts?.mdxStatus;
+    if (lesson.artifacts?.mdxPath && mdxStatus !== "planned") {
+      const mdxTarget = path.join(root, lesson.artifacts.mdxPath);
+      if (!(await exists(mdxTarget))) {
+        add("error", file, `Lesson '${lesson.id}' mdxPath '${lesson.artifacts.mdxPath}' does not exist.`);
+      }
+    }
+    for (const artifactKey of ["slidesPath", "narrationScriptPath", "infographicPath"]) {
+      const artifactPath = lesson.artifacts?.[artifactKey];
+      if (artifactPath && !(await exists(path.join(root, artifactPath)))) {
+        add("error", file, `Lesson '${lesson.id}' ${artifactKey} '${artifactPath}' does not exist.`);
+      }
+    }
+  }
+}
+
 async function validateMdx(file, knownCitationIds) {
   const raw = await fs.readFile(file, "utf8");
   const { body } = stripFrontmatter(raw);
@@ -319,6 +340,7 @@ async function main() {
   for (const file of specFiles) {
     const spec = JSON.parse(await fs.readFile(file, "utf8"));
     validateTutorialSpec(file, spec);
+    await validateArtifactPaths(file, spec);
     for (const ref of spec.references ?? []) citationIds.add(ref.id);
   }
 

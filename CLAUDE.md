@@ -47,6 +47,16 @@ platform migration that changes instance-owned files. After the update, review
 the diff and run `pnpm install`, `pnpm validate`, `pnpm test`, `pnpm lint`, and
 `pnpm build` in the target instance when feasible.
 
+## Setting Up a New Academy
+
+When creating a new academy from this template, run the setup script:
+
+```bash
+pnpm setup
+```
+
+This initializes a git repo (if needed), scaffolds required directories, and validates the build. See `scripts/setup.sh` for details.
+
 ## Required Flow
 
 1. Define the tutorial with `prompts/01-curriculum-design.md`.
@@ -61,6 +71,7 @@ the diff and run `pnpm install`, `pnpm validate`, `pnpm test`, `pnpm lint`, and
 7. Move approved MDX into `content/module-N/`.
 8. Run `pnpm validate`, `pnpm test`, `pnpm lint`, and `pnpm build`.
 9. Complete human review for factuality, pedagogy, accessibility, localization, and all `verify` claims.
+10. (Optional) Make the repo agent-ready with `prompts/09-agent-readiness-bootstrap.md`.
 
 Use `prompts/07-repair-invalid-output.md` when model output fails schema, MDX, citation, or accessibility checks.
 
@@ -86,9 +97,12 @@ prompts/
   05-content-quality.md        # Audit prompt
   07-repair-invalid-output.md  # Repair prompt
   08-multimedia-planning.md    # Multimedia blueprint per lesson
+  09-agent-readiness-bootstrap.md  # Agent-readiness audit and setup
   schemas/
     tutorial-spec.schema.json  # JSON Schema contract
 scripts/
+  setup.sh                     # New academy initialization
+  update-template.sh           # Sync template into existing instance
   validate.mjs                 # Deterministic quality gates
 src/                           # Platform code
 ```
@@ -231,6 +245,18 @@ Example:
 Presentations are Marp markdown files in `presentations/`. Name them `NN-descriptive-name.md`.
 
 Use `<div class="mermaid">` for Mermaid in presentations. Use `MermaidDiagram` or `Diagram` only in MDX lessons.
+
+For production decks (PDF export, offline use, archival), pre-render Mermaid diagrams to SVG images instead of relying on the CDN script:
+
+```bash
+# Pre-render a diagram to SVG
+npx @mermaid-js/mermaid-cli -i diagram.mmd -o presentations/assets/diagram.svg
+
+# Then reference the SVG in the slide
+# ![System Architecture](assets/diagram.svg)
+```
+
+The sample deck uses a CDN `<script>` tag for convenience during authoring. Before presenting or exporting to PDF, replace `<div class="mermaid">` blocks with pre-rendered SVG images so diagrams display without a network connection.
 
 ```markdown
 ---

@@ -320,6 +320,7 @@ export interface LessonSpec {
   scaffolding?: ScaffoldingConfig;
   artifacts: {
     mdxPath: string;
+    mdxStatus?: "planned" | "generated" | "approved";
     items?: ArtifactDescriptor[];
     slidesPath?: string;
     narrationScriptPath?: string;

@@ -1,31 +1,47 @@
 ---
-title: "Your first lesson"
+title: "Classify Claims and Map Evidence"
 quiz:
-  - question: "Which component is used to render syntax-highlighted code in a lesson?"
+  - question: "A generated lesson states 'React is the most popular framework.' No source is cited. What should you do?"
     options:
-      - "MarkdownCode"
-      - "CodeBlock"
-      - "SyntaxHighlighter"
-      - "CodeSnippet"
+      - "Publish it — the claim sounds reasonable"
+      - "Mark it as verify and add a citation task to the source plan"
+      - "Remove it immediately without discussion"
+      - "Replace it with a different unsourced claim"
     correctIndex: 1
-  - question: "What diagram syntax does MermaidDiagram use?"
+    explanation: "Popularity claims change over time and need recent evidence. Mark it verify and track the citation task."
+    distractorExplanations:
+      - "Publishing unsourced claims risks presenting outdated or inaccurate information as fact."
+      - null
+      - "Removal may be premature — the claim could be valid once sourced. Verify first."
+      - "Replacing one unsourced claim with another does not solve the evidence problem."
+  - question: "Which claim state means the statement has a cited, reviewed source?"
     options:
-      - "PlantUML"
-      - "Graphviz DOT"
-      - "Mermaid"
+      - "verify"
+      - "unsupported"
+      - "verified"
     correctIndex: 2
+    explanation: "A verified claim has been checked against a cited source that passed review."
+    distractorExplanations:
+      - "verify means the claim is plausible but still needs a source."
+      - "unsupported means no credible source exists for the claim."
+      - null
+  - question: "When should you remove a claim rather than marking it for verification?"
+    options:
+      - "When the claim is long"
+      - "When no credible source is likely to exist"
+      - "When you are unsure of the answer"
+    correctIndex: 1
+    explanation: "Remove claims that are unsupported and unlikely to be substantiated. Uncertainty alone is not grounds for removal — that is what the verify state is for."
+    distractorExplanations:
+      - "Claim length has no bearing on whether the claim should stay or go."
+      - null
+      - "Uncertainty is exactly what the verify state handles. Reserve removal for claims that cannot be sourced."
 ---
 
-## Overview
-
-Welcome to your first lesson. This file is a **format reference** that demonstrates every MDX component and content pattern available in the Academy template. Use it as a starting point when writing your own lessons.
-
-Each lesson is an `.mdx` file that combines standard Markdown with custom React components. The **frontmatter** block above defines the title and an optional quiz array that powers the interactive quiz section at the bottom of the lesson.
-
 <LearningObjectives items={[
-  "Identify the reusable components available for structured lessons.",
-  "Explain how citations and claim verification states support review.",
-  "Choose an appropriate fallback for diagrams and other rich artifacts."
+  "Classify generated claims as verified, verify, or unsupported.",
+  "Map each claim to its supporting evidence or to a source-plan task.",
+  "Decide whether to publish, mark for verification, or remove each claim."
 ]} />
 
 <Prerequisites items={[
@@ -35,133 +51,128 @@ Each lesson is an `.mdx` file that combines standard Markdown with custom React 
 
 <KeyTerms terms={[
   { term: "Quality gate", definition: "A deterministic check that content must pass before publication." },
-  { term: "Claim state", definition: "A label showing whether a factual statement is verified, needs verification, or is unsupported." }
+  { term: "Claim state", definition: "A label — verified, verify, or unsupported — showing whether a factual statement has adequate evidence." },
+  { term: "Source plan", definition: "A tracking document that lists every citation task needed before a lesson can be published." }
 ]} />
 
-## Architecture diagram
+## Why claims need classification
 
-Use the `MermaidDiagram` component to embed diagrams directly in your lesson. The `graph TD` direction renders a top-down layout, and **subgraphs** let you group related nodes.
+AI-generated lessons can sound authoritative even when their factual statements lack sources. Before publishing any generated content, every claim that depends on external evidence must be classified and either linked to a source or flagged for review.
 
-<MermaidDiagram chart={`graph TD
-    subgraph Input["Input Layer"]
-        A[Raw Content] --> B[Parser]
-    end
-    subgraph Processing["Processing Layer"]
-        B --> C[Validator]
-        C --> D[Transformer]
-    end
-    subgraph Output["Output Layer"]
-        D --> E[Renderer]
-        E --> F[Final Output]
-    end
-    style Input fill:#e2e8f0,stroke:#4a5568
-    style Processing fill:#ebf8ff,stroke:#3182ce
-    style Output fill:#f0fff4,stroke:#38a169
-`} />
+This lesson walks you through that process using a single applied task: take a set of claims from a generated draft, classify each one, map it to evidence, and decide whether to publish, verify, or remove it.
 
 <Diagram
   chart={`graph LR
-    Spec[Tutorial Spec] --> Prompt[Structured Prompt]
-    Prompt --> Output[JSON Output]
-    Output --> Validate[Quality Gates]
-    Validate --> Review[Human Review]
+    Draft[Generated Draft] --> Classify[Classify Claims]
+    Classify --> Map[Map to Evidence]
+    Map --> Decide{Publish / Verify / Remove}
   `}
-  fallback="Tutorial specification flows into structured prompts, JSON output, quality gates, and human review."
-  caption="Generation artifacts move through validation before review."
+  fallback="Generated draft flows into claim classification, then evidence mapping, then a publish, verify, or remove decision."
+  caption="The claim review pipeline applied to every generated lesson."
 />
 
-## Data flow diagram
+## The three claim states
 
-A `graph LR` layout is useful for showing sequential data flows or pipelines. Each arrow can carry a label to describe the transformation between stages.
+Every factual claim in generated content falls into one of three states:
 
-<MermaidDiagram chart={`graph LR
-    Source[Data Source] -->|fetch| Ingest[Ingestion]
-    Ingest -->|validate| Clean[Cleaning]
-    Clean -->|transform| Enrich[Enrichment]
-    Enrich -->|load| Store[Data Store]
-    Store -->|query| API[API Layer]
-    API -->|respond| Client[Client App]
-    style Source fill:#fefcbf,stroke:#d69e2e
-    style Store fill:#c6f6d5,stroke:#38a169
-    style Client fill:#bee3f8,stroke:#3182ce
+| State | Meaning | Action |
+|-------|---------|--------|
+| **verified** | A cited, reviewed source supports the claim. | Publish with citation. |
+| **verify** | The claim is plausible but lacks a source. | Add a citation task to the source plan. |
+| **unsupported** | No credible source is likely to exist. | Remove or rewrite the claim. |
+
+<MermaidDiagram chart={`graph TD
+    Claim[Factual Claim] --> HasSource{Has cited source?}
+    HasSource -->|Yes| Reviewed{Source reviewed?}
+    HasSource -->|No| Plausible{Plausible?}
+    Reviewed -->|Yes| Verified[verified]
+    Reviewed -->|No| Verify1[verify]
+    Plausible -->|Yes| Verify2[verify]
+    Plausible -->|No| Unsupported[unsupported — remove]
+    style Verified fill:#c6f6d5,stroke:#38a169
+    style Verify1 fill:#fefcbf,stroke:#d69e2e
+    style Verify2 fill:#fefcbf,stroke:#d69e2e
+    style Unsupported fill:#fed7d7,stroke:#e53e3e
 `} />
 
-## Code example
+## Applying the classification
 
-The `CodeBlock` component renders syntax-highlighted code with an optional filename tab. Set the `language` prop to enable the correct highlighter and `filename` to display a header.
+Here is a fragment from a generated lesson draft. Read each numbered claim and classify it.
 
-<CodeBlock code={`# example.py — A minimal processing function
+<CodeBlock code={`# Generated Draft — "Getting Started with MDX"
 
-def process(items: list[str]) -> list[str]:
-    """Clean, validate, and return processed items."""
-    results = []
-    for item in items:
-        cleaned = item.strip().lower()
-        if cleaned:
-            results.append(cleaned)
-    return results
+1. MDX lets you use JSX components inside Markdown files.
+   → Source: MDX documentation (https://mdxjs.com/)
 
+2. MDX is the most popular documentation format in 2026.
+   → No source provided.
 
-if __name__ == "__main__":
-    sample = ["  Hello ", "WORLD", "", "  foo  "]
-    print(process(sample))
-    # Output: ['hello', 'world', 'foo']
-`} language="python" filename="example.py" />
+3. MDX files compile to plain HTML with zero runtime overhead.
+   → No source provided. Likely inaccurate (MDX uses a JS runtime).
+`} language="markdown" filename="draft-claims.md" />
 
-## Key concepts
+Walk through each claim:
 
-Below is a bulleted list summarizing the main components you can use in any lesson:
+- **Claim 1** has a cited source from the official MDX documentation. If the source has been reviewed, classify as **verified**.
+- **Claim 2** makes a popularity assertion with no evidence. Popularity changes over time, so this is plausible but unverified. Classify as **verify** and add a citation task.
+- **Claim 3** makes a technical assertion that contradicts how MDX works. No credible source is likely to support it. Classify as **unsupported** and remove it.
 
-- **MermaidDiagram** -- renders Mermaid charts inline with support for all diagram types
-- **CodeBlock** -- displays syntax-highlighted code with a filename header
-- **Frontmatter quiz** -- defines interactive multiple-choice questions in YAML
-- **Standard Markdown** -- headings, lists, tables, blockquotes, and inline formatting all work as expected
-
-## Step-by-step workflow
-
-When creating a new lesson, follow these steps:
-
-1. Create a new `.mdx` file in the appropriate module folder
-2. Add frontmatter with at least a `title` field
-3. Write your content using `##` section headings
-4. Embed diagrams and code blocks where they add clarity
-5. Add quiz questions to the frontmatter to reinforce learning
-
-> **Tip:** Keep each lesson focused on a single concept. Shorter lessons with clear diagrams and a quick quiz are more effective than long, dense pages.
-
-<Callout title="Source discipline" tone="verify">
-  Use <Citation id="ref-mdx" href="https://mdxjs.com/" quality="official-docs">official MDX documentation</Citation> when explaining MDX syntax, and mark claims that still need source review.
+<Callout title="Source discipline">
+  Use <Citation id="ref-mdx" href="https://mdxjs.com/" quality="official-docs">official MDX documentation</Citation> as a primary source for MDX syntax claims. Mark any claim that goes beyond what the documentation states.
 </Callout>
+
+## Mapping claims to evidence
+
+After classifying, map each claim to its evidence trail:
+
+| Claim | State | Evidence | Decision |
+|-------|-------|----------|----------|
+| MDX supports JSX in Markdown | verified | ref-mdx (official docs) | Publish with citation |
+| MDX is the most popular format | verify | Source plan task SP-12 | Hold until sourced |
+| MDX compiles to plain HTML | unsupported | Contradicts MDX runtime model | Remove |
 
 <VerifyClaim status="verify">
   Claims about current tool popularity or ecosystem adoption should be checked against recent sources before publication.
 </VerifyClaim>
 
-<Flashcards cards={[
-  { front: "What should a diagram include?", back: "Readable source plus fallback text that preserves the instructional meaning." },
-  { front: "When should a claim be marked verify?", back: "When it is plausible but lacks sufficient evidence in the approved source plan." }
-]} />
+## Worked example
 
-<WorkedExample title="Turn a risky claim into reviewable content" steps={[
-  "Find the unsupported factual claim.",
-  "Wrap it in VerifyClaim with status set to verify.",
-  "Add a citation task to the source plan."
+<WorkedExample title="Classify a popularity claim" steps={[
+  "Read the claim: 'Library X is the recommended option for new projects.'",
+  "Check the source plan: no citation is listed for this claim.",
+  "The claim is plausible — Library X is widely used — but 'recommended' implies consensus that may not exist.",
+  "Classify as verify. Add a source-plan entry to find a recent, authoritative comparison.",
+  "In the MDX, wrap the claim in a VerifyClaim component with status='verify'."
 ]}>
-  A reviewable lesson makes uncertainty explicit instead of hiding it in polished prose.
+  A reviewable lesson makes uncertainty explicit. The verify state keeps the claim visible for review instead of silently publishing or silently removing it.
 </WorkedExample>
 
-<Exercise title="Classify a claim" answer="Mark it as verify until a recent source supports it.">
-  A generated lesson says a library is the recommended option for current projects, but the source plan has no current reference. What should you do?
+## Practice exercise
+
+<Exercise title="Classify three claims" answer="Claim A: verified (cite WCAG 2.2). Claim B: verify (add source-plan task for current screen-reader statistics). Claim C: unsupported (remove — no specification guarantees this).">
+  Classify each claim and state your decision (publish, verify, or remove):
+
+  **A.** "WCAG 2.2 requires text alternatives for non-text content." (Source: W3C WCAG 2.2 specification)
+
+  **B.** "Over 90% of screen readers now support ARIA landmarks." (No source cited)
+
+  **C.** "All browsers render ARIA roles identically." (No source cited)
 </Exercise>
+
+<Flashcards cards={[
+  { front: "When should a claim be marked verify?", back: "When it is plausible but lacks a cited, reviewed source." },
+  { front: "What makes a claim unsupported rather than verify?", back: "No credible source is likely to exist, or the claim contradicts established facts." },
+  { front: "What belongs in the source plan?", back: "A citation task for every claim classified as verify, with enough detail to find the right source." }
+]} />
 
 <QuizBlock questions={[
   {
-    prompt: "Why prefer structured JSON from generation prompts?",
-    choices: ["It is easier to validate", "It removes the need for review", "It prevents all errors"],
-    answer: "Structured JSON is easier to validate, but it still needs review."
+    prompt: "A lesson says 'This approach guarantees zero downtime.' No source is cited and the guarantee depends on many external factors. What is the correct classification?",
+    choices: ["verified", "verify", "unsupported"],
+    answer: "unsupported — absolute guarantees about complex systems rarely have credible backing. Remove or rewrite."
   }
 ]} />
 
 ## Summary
 
-This lesson demonstrated every content pattern the template supports: section headings, bold key terms, architecture and flow diagrams, code blocks, bulleted and numbered lists, and blockquotes. Use this file as a reference whenever you need to check the syntax for a particular component.
+Every generated claim needs a classification before publication. Map verified claims to their citations, send verify claims to the source plan, and remove unsupported claims. This three-state model keeps uncertainty visible so reviewers can focus on substance rather than guessing which statements are sourced.

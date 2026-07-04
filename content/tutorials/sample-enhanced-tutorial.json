@@ -12,16 +12,22 @@
   "prerequisites": ["Can edit MDX files", "Can run pnpm scripts locally"],
   "learningObjectives": [
     {
-      "id": "obj-define-quality",
-      "description": "Define quality gates for generated educational content.",
-      "bloomLevel": "apply",
-      "assessmentIds": ["assess-quality-gates"]
+      "id": "obj-classify-claims",
+      "description": "Classify generated claims as verified, verify, or unsupported based on available evidence.",
+      "bloomLevel": "analyze",
+      "assessmentIds": ["assess-classification"]
     },
     {
       "id": "obj-map-evidence",
-      "description": "Map tutorial claims to cited sources and verification states.",
-      "bloomLevel": "analyze",
-      "assessmentIds": ["assess-citation-map"]
+      "description": "Map each claim to its supporting citation or to a source-plan task.",
+      "bloomLevel": "apply",
+      "assessmentIds": ["assess-evidence-mapping"]
+    },
+    {
+      "id": "obj-decide-action",
+      "description": "Decide whether to publish, mark for verification, or remove each claim.",
+      "bloomLevel": "evaluate",
+      "assessmentIds": ["assess-publish-decision"]
     }
   ],
   "scope": {
@@ -32,14 +38,14 @@
     {
       "id": "lesson-quality-foundation",
       "slug": "01-quality-foundations",
-      "title": "Quality Foundations",
-      "summary": "Learn how explicit schemas and source rules reduce ambiguity in generated tutorials.",
+      "title": "Classify Claims and Map Evidence",
+      "summary": "Classify generated claims, map each to evidence, and decide whether to publish, verify, or remove.",
       "estimatedMinutes": 10,
       "difficulty": "beginner",
       "prerequisites": ["Can read JSON"],
-      "objectiveIds": ["obj-define-quality"],
-      "conceptIds": ["concept-quality-gate"],
-      "referenceIds": ["ref-wcag"],
+      "objectiveIds": ["obj-classify-claims", "obj-map-evidence", "obj-decide-action"],
+      "conceptIds": ["concept-quality-gate", "concept-claim-state"],
+      "referenceIds": ["ref-wcag", "ref-mdx"],
       "artifacts": {
         "mdxPath": "content/module-1/01-quality-foundations.mdx",
         "mdxStatus": "planned",
@@ -48,7 +54,7 @@
             "id": "art-quality-flow",
             "type": "mermaid",
             "status": "planned",
-            "objectiveIds": ["obj-define-quality"],
+            "objectiveIds": ["obj-classify-claims"],
             "accessibility": {
               "altText": "Flowchart showing spec to prompt to validation to review pipeline",
               "fallbackText": "Tutorial specs feed structured prompts, then validation gates, then human review."
@@ -74,7 +80,7 @@
       "metacognition": [
         {
           "type": "self-assessment",
-          "prompt": "Before starting, rate your confidence in defining what makes educational content reliable.",
+          "prompt": "Before starting, rate your confidence in deciding which claims in a generated lesson are ready to publish.",
           "placement": "before-lesson"
         }
       ],
@@ -92,7 +98,7 @@
       "estimatedMinutes": 15,
       "difficulty": "intermediate",
       "prerequisites": ["Understands quality gates"],
-      "objectiveIds": ["obj-map-evidence"],
+      "objectiveIds": ["obj-map-evidence", "obj-decide-action"],
       "conceptIds": ["concept-claim-state"],
       "referenceIds": ["ref-mdx"],
       "dependsOnLessonIds": ["lesson-quality-foundation"],
@@ -143,61 +149,80 @@
   ],
   "workedExamples": [
     {
-      "id": "example-claim-check",
-      "title": "Marking a claim for verification",
-      "prompt": "A lesson says a tool is the most popular option but has no source.",
-      "steps": ["Label the claim as verify.", "Add it to the source plan.", "Require a citation before publishing."],
-      "explanation": "Popularity claims are unstable and need recent evidence.",
+      "id": "example-classify-popularity",
+      "title": "Classify a popularity claim",
+      "prompt": "A generated lesson says 'Library X is the recommended option for new projects' but the source plan has no citation.",
+      "steps": [
+        "Check the source plan — no citation is listed for this claim.",
+        "The claim is plausible but 'recommended' implies consensus that may not exist.",
+        "Classify as verify.",
+        "Add a source-plan entry to find a recent, authoritative comparison.",
+        "Wrap the claim in a VerifyClaim component with status='verify'."
+      ],
+      "explanation": "The verify state keeps plausible claims visible for review rather than silently publishing or removing them.",
       "conceptIds": ["concept-claim-state"],
       "referenceIds": ["ref-mdx"]
     }
   ],
   "exercises": [
     {
-      "id": "exercise-quality-gate",
-      "prompt": "List three checks that should run before publishing a generated lesson.",
-      "type": "short-answer",
+      "id": "exercise-classify-claims",
+      "prompt": "Classify three claims (WCAG requirement with source, screen-reader statistic without source, browser rendering guarantee without source) and decide: publish, verify, or remove.",
+      "type": "scenario",
       "difficulty": "beginner",
-      "conceptIds": ["concept-quality-gate"],
-      "answerId": "answer-quality-gate"
+      "conceptIds": ["concept-claim-state", "concept-quality-gate"],
+      "answerId": "answer-classify-claims"
     }
   ],
   "answers": [
     {
-      "id": "answer-quality-gate",
-      "exerciseId": "exercise-quality-gate",
-      "answer": "Schema validation, MDX compilation, citation checks, accessibility checks, and unsupported-claim detection.",
-      "rubric": ["Names deterministic checks", "Includes at least one source or claim check"]
+      "id": "answer-classify-claims",
+      "exerciseId": "exercise-classify-claims",
+      "answer": "Claim A (WCAG requirement): verified — publish with citation. Claim B (screen-reader statistic): verify — add source-plan task. Claim C (identical rendering): unsupported — remove.",
+      "rubric": ["Correctly identifies all three claim states", "Justifies each decision with evidence reasoning"]
     }
   ],
   "formativeAssessment": [
     {
-      "id": "assess-quality-gates",
+      "id": "assess-classification",
       "type": "quiz",
-      "prompt": "Why should validation run before human review?",
-      "expectedAnswer": "It catches structural and mechanical defects before reviewers spend time on pedagogy and factuality.",
-      "objectiveIds": ["obj-define-quality"]
+      "prompt": "A generated lesson states a tool is the most popular but cites no source. What is the correct classification?",
+      "expectedAnswer": "verify — the claim is plausible but lacks a cited source. Add a source-plan task.",
+      "objectiveIds": ["obj-classify-claims"]
     },
     {
-      "id": "assess-citation-map",
+      "id": "assess-evidence-mapping",
       "type": "free-response",
-      "prompt": "How should an unsupported claim be represented in MDX?",
-      "expectedAnswer": "It should be wrapped in a verification state and connected to a source plan item.",
+      "prompt": "After classifying a claim as verify, what two actions should you take?",
+      "expectedAnswer": "Add a citation task to the source plan and wrap the claim in a VerifyClaim component in the MDX.",
       "objectiveIds": ["obj-map-evidence"]
+    },
+    {
+      "id": "assess-publish-decision",
+      "type": "quiz",
+      "prompt": "When should you remove a claim rather than marking it for verification?",
+      "expectedAnswer": "When no credible source is likely to exist or the claim contradicts established facts.",
+      "objectiveIds": ["obj-decide-action"]
     }
   ],
   "masteryCriteria": [
     {
-      "id": "mastery-quality",
-      "description": "Can explain the purpose of each required quality gate.",
-      "objectiveIds": ["obj-define-quality"],
-      "threshold": "Accurately explains at least four gates."
+      "id": "mastery-classify",
+      "description": "Can classify claims as verified, verify, or unsupported based on evidence availability.",
+      "objectiveIds": ["obj-classify-claims"],
+      "threshold": "Correctly classifies four out of five sample claims."
     },
     {
       "id": "mastery-evidence",
-      "description": "Can classify claims as verified, verify, or unsupported.",
+      "description": "Can map each classified claim to a citation or source-plan task.",
       "objectiveIds": ["obj-map-evidence"],
-      "threshold": "Correctly classifies four out of five sample claims."
+      "threshold": "Produces a complete evidence map for a set of three claims."
+    },
+    {
+      "id": "mastery-decision",
+      "description": "Can justify publish, verify, or remove decisions for each claim.",
+      "objectiveIds": ["obj-decide-action"],
+      "threshold": "Correctly decides and justifies action for four out of five claims."
     }
   ],
   "recap": ["Use structured specs to constrain generation.", "Treat citations and verification states as required content, not polish."],
