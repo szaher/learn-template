@@ -25,6 +25,7 @@ function extractText(node: React.ReactNode): string {
 export default function CodeBlock({ code, language = "python", filename, children }: CodeBlockProps) {
   const codeText = code || extractText(children) || "";
   const [copied, setCopied] = useState(false);
+  const [editorReady, setEditorReady] = useState(false);
   const [editorTheme, setEditorTheme] = useState<"vs-dark" | "vs">(() =>
     typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "light" ? "vs" : "vs-dark"
   );
@@ -59,26 +60,37 @@ export default function CodeBlock({ code, language = "python", filename, childre
           {copied ? "Copied!" : "Copy"}
         </button>
       </div>
-      <Editor
-        height={height}
-        language={language}
-        value={codeText}
-        theme={editorTheme}
-        options={{
-          readOnly: true,
-          minimap: { enabled: false },
-          scrollBeyondLastLine: false,
-          fontSize: 13,
-          lineNumbers: "on",
-          folding: false,
-          padding: { top: 12, bottom: 12 },
-          renderLineHighlight: "none",
-          overviewRulerLanes: 0,
-          hideCursorInOverviewRuler: true,
-          overviewRulerBorder: false,
-          scrollbar: { vertical: "hidden", horizontal: "auto" },
-        }}
-      />
+
+      <pre
+        aria-hidden={editorReady}
+        className={editorReady ? "sr-only" : "p-3 overflow-x-auto text-sm leading-relaxed text-[var(--text-primary)]"}
+      >
+        <code className={`language-${language}`}>{codeText}</code>
+      </pre>
+
+      <div className={editorReady ? undefined : "sr-only"} aria-hidden={!editorReady}>
+        <Editor
+          height={height}
+          language={language}
+          value={codeText}
+          theme={editorTheme}
+          onMount={() => setEditorReady(true)}
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 13,
+            lineNumbers: "on",
+            folding: false,
+            padding: { top: 12, bottom: 12 },
+            renderLineHighlight: "none",
+            overviewRulerLanes: 0,
+            hideCursorInOverviewRuler: true,
+            overviewRulerBorder: false,
+            scrollbar: { vertical: "hidden", horizontal: "auto" },
+          }}
+        />
+      </div>
     </div>
   );
 }

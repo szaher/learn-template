@@ -1,0 +1,108 @@
+---
+title: "Test Lesson"
+quiz:
+  - question: "Test?"
+    options:
+      - "A"
+      - "B"
+    correctIndex: 0
+---
+
+## Template literal props
+
+<MermaidDiagram chart={`graph TD
+    A[Start] --> B[End]
+    B --> C{Decision}
+    C -->|yes| D[Accept]
+    C -->|no| E[Reject]
+`} />
+
+## Code with special characters
+
+<CodeBlock code={`def compare(a, b):
+    if a > b:
+        return "a is greater"
+    return \`result: ${a}\`
+`} language="python" filename="compare.py" />
+
+## Nested components
+
+<Callout title="Important note" tone="info">
+  This callout contains a <Citation id="ref-test" href="https://example.com">cited source</Citation> inline.
+</Callout>
+
+## Learning components
+
+<LearningObjectives items={[
+  "Understand export pipeline.",
+  "Verify golden-file tests."
+]} />
+
+<Prerequisites items={[
+  "Node.js installed",
+  "Basic MDX knowledge"
+]} />
+
+<KeyTerms terms={[
+  { term: "AST", definition: "Abstract Syntax Tree" },
+  { term: "MDX", definition: "Markdown with JSX" }
+]} />
+
+## Verification states
+
+<VerifyClaim status="verify">
+  This claim needs source review.
+</VerifyClaim>
+
+<Warning>Do not skip validation.</Warning>
+
+## Interactive elements
+
+<Flashcards cards={[
+  { front: "What is MDX?", back: "Markdown with JSX components." }
+]} />
+
+<WorkedExample title="Parse MDX" steps={[
+  "Read the file.",
+  "Parse with remark-mdx.",
+  "Walk the AST."
+]}>
+  AST-based transformation is more reliable than regex.
+</WorkedExample>
+
+<Exercise title="Write a transformer" answer="Use the visitor pattern to handle each node type.">
+  How would you convert an MDX component to plain Markdown?
+</Exercise>
+
+<QuizBlock questions={[
+  {
+    prompt: "Which parser handles MDX?",
+    choices: ["remark-mdx", "marked", "showdown"],
+    answer: "remark-mdx extends remark-parse with JSX support."
+  }
+]} />
+
+## Standard markdown
+
+Regular **bold** and *italic* text with `inline code`.
+
+> A blockquote with
+> multiple lines.
+
+| Column A | Column B |
+|----------|----------|
+| Value 1  | Value 2  |
+
+## Unknown component
+
+<CustomWidget mode="demo" />
+
+## Diagram with fallback
+
+<Diagram
+  chart={`graph LR
+    X --> Y
+  `}
+  fallback="X connects to Y."
+  caption="Simple flow."
+/>

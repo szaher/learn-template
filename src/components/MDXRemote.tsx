@@ -54,7 +54,7 @@ export function MDXRemote({ source }: MDXRemoteProps) {
     <BaseMDXRemote
       source={source}
       components={components}
-      options={{ blockJS: false }}
+      options={{ blockJS: true }}
     />
   );
 }

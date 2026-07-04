@@ -76,12 +76,26 @@ function extractText(node: React.ReactNode): string {
   return "";
 }
 
+const SR_ONLY: React.CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: 0,
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: 0,
+};
+
 export default function MermaidDiagram({ chart, fallback, children }: MermaidDiagramProps) {
   const chartText = chart || extractText(children) || "";
   const id = useId().replace(/:/g, "-");
   const [svgHtml, setSvgHtml] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(getResolvedTheme);
+
+  const accessibleLabel = fallback || "Diagram";
 
   useEffect(() => {
     const observer = new MutationObserver(() => setTheme(getResolvedTheme()));
@@ -111,9 +125,16 @@ export default function MermaidDiagram({ chart, fallback, children }: MermaidDia
   }, [chartText, id, theme]);
 
   return (
-    <div className="my-6 p-4 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-x-auto">
+    <div
+      className="my-6 p-4 bg-[var(--bg-tertiary)] rounded-xl border border-[var(--border)] overflow-x-auto"
+      role="img"
+      aria-label={accessibleLabel}
+    >
       {svgHtml ? (
-        <div className="mermaid flex justify-center" dangerouslySetInnerHTML={{ __html: svgHtml }} />
+        <>
+          <div className="mermaid flex justify-center" dangerouslySetInnerHTML={{ __html: svgHtml }} aria-hidden="true" />
+          <span style={SR_ONLY}>{accessibleLabel}</span>
+        </>
       ) : failed ? (
         <pre className="mermaid whitespace-pre-wrap text-sm text-[var(--text-secondary)]">
           {fallback || chartText}

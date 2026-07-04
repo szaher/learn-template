@@ -42,8 +42,7 @@
       "referenceIds": ["ref-wcag", "ref-mdx"],
       "artifacts": {
         "mdxPath": "content/module-1/01-sample-lesson.mdx",
-        "slidesPath": "presentations/00-sample-deck.md",
-        "narrationScriptPath": "content/module-1/01-sample-lesson.narration.md"
+        "slidesPath": "presentations/00-sample-deck.md"
       }
     }
   ],

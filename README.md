@@ -1,6 +1,6 @@
 # AI Tutorial Template
 
-A production-grade Next.js template for AI-generated, end-to-end educational tutorials. It combines typed tutorial specifications, structured prompt contracts, reusable MDX learning components, deterministic quality gates, and human-review checkpoints.
+A starter Next.js template for authoring AI-assisted educational tutorials. It provides typed tutorial specifications, structured prompt contracts, reusable MDX learning components, and basic structural validation. Generated content requires subject-matter review, accessibility auditing, rights clearance, and security review before publication.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ pnpm dev
 - Staged generation pipeline in `src/lib/generationPipeline.ts`.
 - JSON-first prompt templates in `prompts/`.
 - MDX learning components for objectives, prerequisites, terms, callouts, diagrams, flashcards, quizzes, worked examples, exercises, citations, source labels, verification states, narration hooks, mind maps, infographics, and slide embeds.
-- Automated gates for schema validation, MDX compilation, links, citations, accessibility basics, duplicate content, and unsupported-claim signals.
+- Basic structural checks for schema shape, MDX compilation, local asset references, citation IDs, image alt text, duplicate paragraphs, and a limited risky-claim keyword scan. These checks do not verify source accuracy, external-link availability, rights clearance, screen-reader usability, or instructional effectiveness — those require human review.
 - GitHub Actions CI in `.github/workflows/ci.yml`.
 
 ## Project Structure
@@ -43,7 +43,7 @@ src/lib/                    # Curriculum, MDX, validation, pipeline helpers
 | `pnpm dev` | Start the Next.js dev server |
 | `pnpm preview` | Alias for local preview |
 | `pnpm update:template` | Sync template changes into another instance |
-| `pnpm validate` | Run deterministic content quality gates |
+| `pnpm validate` | Run basic structural content checks |
 | `pnpm test` | Run Vitest tests |
 | `pnpm lint` | Run ESLint |
 | `pnpm build` | Build the app |
@@ -103,3 +103,7 @@ See [docs/architecture.md](docs/architecture.md) and [docs/authoring-flow.md](do
 - Node.js 22+
 - pnpm
 - Optional Google Cloud credentials for the AI chat tutor
+
+## License
+
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for the full text.

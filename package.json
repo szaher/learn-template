@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "setup": "bash scripts/setup.sh",
     "dev": "next dev",
     "preview": "next dev",
     "update:template": "bash scripts/update-template.sh",
@@ -10,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "export": "node scripts/export.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -45,8 +47,13 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
     "jsdom": "^29.1.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0",
     "vitest": "^4.1.8"
   }
 }

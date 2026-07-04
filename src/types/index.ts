@@ -50,6 +50,7 @@ export interface QuizQuestion {
   options: string[];
   correctIndex: number;
   explanation: string;
+  distractorExplanations?: string[];
 }
 
 export interface ExportRequest {

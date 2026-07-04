@@ -42,6 +42,7 @@
       "referenceIds": ["ref-wcag"],
       "artifacts": {
         "mdxPath": "content/module-1/01-quality-foundations.mdx",
+        "mdxStatus": "planned",
         "items": [
           {
             "id": "art-quality-flow",
@@ -96,7 +97,8 @@
       "referenceIds": ["ref-mdx"],
       "dependsOnLessonIds": ["lesson-quality-foundation"],
       "artifacts": {
-        "mdxPath": "content/module-1/02-evidence-mapping.mdx"
+        "mdxPath": "content/module-1/02-evidence-mapping.mdx",
+        "mdxStatus": "planned"
       }
     }
   ],

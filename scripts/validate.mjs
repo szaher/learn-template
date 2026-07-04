@@ -329,11 +329,12 @@ async function main() {
   for (const error of errors) console.error(`error ${error}`);
 
   if (errors.length > 0) {
-    console.error(`Validation failed with ${errors.length} error(s) and ${warnings.length} warning(s).`);
+    console.error(`Structural checks failed with ${errors.length} error(s) and ${warnings.length} warning(s).`);
     process.exit(1);
   }
 
-  console.log(`Validation passed for ${specFiles.length} tutorial spec(s) and ${mdxFiles.length} MDX file(s).`);
+  console.log(`Structural checks passed for ${specFiles.length} tutorial spec(s) and ${mdxFiles.length} MDX file(s).`);
+  console.log("Note: these checks do not verify source accuracy, external-link availability, rights clearance, screen-reader usability, or instructional effectiveness.");
   if (warnings.length > 0) console.log(`${warnings.length} warning(s) reported.`);
 }
 
