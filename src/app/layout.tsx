@@ -22,7 +22,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body className="min-h-screen flex flex-col">
-        <Script src="/theme-init.js" strategy="beforeInteractive" />
+        <Script src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/theme-init.js`} strategy="beforeInteractive" />
         <Header />
         <div className="flex flex-1 min-h-0">
           <Sidebar curriculum={curriculum} />
