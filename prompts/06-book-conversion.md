@@ -10,7 +10,7 @@ Before converting content, understand what makes a professional book.
 
 ### Book Anatomy
 
-Every well-structured book has three parts:
+Many technical books use three parts — front matter, body matter, and back matter. Adapt the structure to the publication's needs:
 
 **Front Matter** (numbered with roman numerals: i, ii, iii...):
 - **Half-title page** — book title only, no author

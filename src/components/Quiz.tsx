@@ -25,7 +25,7 @@ export default function Quiz({ questions, onComplete }: QuizProps) {
     setScore(newScore);
     setSubmitted(true);
 
-    if (currentIndex === questions.length - 1) {
+    if (currentIndex === questions.length - 1 && correct) {
       setFinished(true);
       onComplete(newScore);
     }

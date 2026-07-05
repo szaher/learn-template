@@ -93,7 +93,7 @@ Every factual claim in generated content falls into one of three states:
     style Verify1 fill:#fefcbf,stroke:#d69e2e
     style Verify2 fill:#fefcbf,stroke:#d69e2e
     style Unsupported fill:#fed7d7,stroke:#e53e3e
-`} />
+`} fallback="Decision tree: a factual claim is checked for a cited source. If yes and reviewed, it is verified. If no source but plausible, mark as verify. If not plausible, mark unsupported and remove." />
 
 ## Applying the classification
 
@@ -152,7 +152,7 @@ After classifying, map each claim to its evidence trail:
 <Exercise title="Classify three claims" answer="Claim A: verified (cite WCAG 2.2). Claim B: verify (add source-plan task for current screen-reader statistics). Claim C: unsupported (remove — no specification guarantees this).">
   Classify each claim and state your decision (publish, verify, or remove):
 
-  **A.** "WCAG 2.2 requires text alternatives for non-text content." (Source: W3C WCAG 2.2 specification)
+  **A.** "WCAG 2.2 requires text alternatives for non-text content." (Source: <Citation id="ref-wcag" href="https://www.w3.org/TR/WCAG22/" quality="primary">W3C WCAG 2.2 specification</Citation>)
 
   **B.** "Over 90% of screen readers now support ARIA landmarks." (No source cited)
 

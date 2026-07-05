@@ -64,20 +64,186 @@ function extractExpressionValue(raw) {
     return trimmed.slice(1, -1);
   }
   if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-    try {
-      const jsonified = trimmed
-        .replace(/(\w+)\s*:/g, '"$1":')
-        .replace(/'/g, '"');
-      return JSON.parse(jsonified);
-    } catch {
-      try {
-        return new Function(`return (${trimmed})`)();
-      } catch {
-        return trimmed;
+    return parseLiteralExpression(trimmed);
+  }
+  if (trimmed === "true") return true;
+  if (trimmed === "false") return false;
+  if (trimmed === "null") return null;
+  if (trimmed === "undefined") return undefined;
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) return Number(trimmed);
+  return trimmed;
+}
+
+function parseLiteralExpression(source) {
+  let pos = 0;
+
+  function skipWhitespace() {
+    while (pos < source.length && /\s/.test(source[pos])) pos++;
+  }
+
+  function parseValue() {
+    skipWhitespace();
+    if (pos >= source.length) throw new Error("Unexpected end of input");
+    const ch = source[pos];
+    if (ch === '"') return parseDoubleString();
+    if (ch === "'") return parseSingleString();
+    if (ch === "`") return parseTemplateLiteral();
+    if (ch === "[") return parseArray();
+    if (ch === "{") return parseObject();
+    if (ch === "-" || (ch >= "0" && ch <= "9")) return parseNumber();
+    return parseKeyword();
+  }
+
+  function parseDoubleString() {
+    pos++;
+    let str = "";
+    while (pos < source.length && source[pos] !== '"') {
+      if (source[pos] === "\\") {
+        pos++;
+        str += parseEscapeChar();
+      } else {
+        str += source[pos++];
       }
     }
+    if (pos >= source.length) throw new Error("Unterminated string");
+    pos++;
+    return str;
   }
-  return trimmed;
+
+  function parseSingleString() {
+    pos++;
+    let str = "";
+    while (pos < source.length && source[pos] !== "'") {
+      if (source[pos] === "\\") {
+        pos++;
+        str += parseEscapeChar();
+      } else {
+        str += source[pos++];
+      }
+    }
+    if (pos >= source.length) throw new Error("Unterminated string");
+    pos++;
+    return str;
+  }
+
+  function parseTemplateLiteral() {
+    pos++;
+    let str = "";
+    while (pos < source.length && source[pos] !== "`") {
+      if (source[pos] === "$" && pos + 1 < source.length && source[pos + 1] === "{") {
+        throw new Error("Template interpolation is not allowed");
+      }
+      if (source[pos] === "\\") {
+        pos++;
+        str += parseEscapeChar();
+      } else {
+        str += source[pos++];
+      }
+    }
+    if (pos >= source.length) throw new Error("Unterminated template literal");
+    pos++;
+    return str;
+  }
+
+  function parseEscapeChar() {
+    if (pos >= source.length) throw new Error("Unexpected end of escape");
+    const ch = source[pos++];
+    switch (ch) {
+      case "n": return "\n";
+      case "t": return "\t";
+      case "r": return "\r";
+      case "\\": return "\\";
+      case "'": return "'";
+      case '"': return '"';
+      case "`": return "`";
+      default: return ch;
+    }
+  }
+
+  function parseNumber() {
+    const start = pos;
+    if (source[pos] === "-") pos++;
+    while (pos < source.length && source[pos] >= "0" && source[pos] <= "9") pos++;
+    if (pos < source.length && source[pos] === ".") {
+      pos++;
+      while (pos < source.length && source[pos] >= "0" && source[pos] <= "9") pos++;
+    }
+    if (pos < source.length && (source[pos] === "e" || source[pos] === "E")) {
+      pos++;
+      if (pos < source.length && (source[pos] === "+" || source[pos] === "-")) pos++;
+      while (pos < source.length && source[pos] >= "0" && source[pos] <= "9") pos++;
+    }
+    return Number(source.slice(start, pos));
+  }
+
+  function parseKeyword() {
+    const start = pos;
+    while (pos < source.length && /[a-zA-Z]/.test(source[pos])) pos++;
+    const word = source.slice(start, pos);
+    if (word === "true") return true;
+    if (word === "false") return false;
+    if (word === "null") return null;
+    if (word === "undefined") return undefined;
+    throw new Error(`Unsupported expression: '${word}' — only literals are allowed`);
+  }
+
+  function parseArray() {
+    pos++;
+    const arr = [];
+    skipWhitespace();
+    if (pos < source.length && source[pos] === "]") { pos++; return arr; }
+    while (pos < source.length) {
+      if (source[pos] === "." && pos + 2 < source.length && source[pos + 1] === "." && source[pos + 2] === ".") {
+        throw new Error("Spread operator is not allowed");
+      }
+      arr.push(parseValue());
+      skipWhitespace();
+      if (pos < source.length && source[pos] === ",") { pos++; skipWhitespace(); continue; }
+      if (pos < source.length && source[pos] === "]") { pos++; return arr; }
+      throw new Error("Expected ',' or ']' in array");
+    }
+    throw new Error("Unterminated array");
+  }
+
+  function parseObject() {
+    pos++;
+    const obj = {};
+    skipWhitespace();
+    if (pos < source.length && source[pos] === "}") { pos++; return obj; }
+    while (pos < source.length) {
+      skipWhitespace();
+      if (source[pos] === "." && pos + 2 < source.length && source[pos + 1] === "." && source[pos + 2] === ".") {
+        throw new Error("Spread operator is not allowed");
+      }
+      let key;
+      if (source[pos] === '"') key = parseDoubleString();
+      else if (source[pos] === "'") key = parseSingleString();
+      else {
+        const start = pos;
+        while (pos < source.length && /[\w$]/.test(source[pos])) pos++;
+        if (pos === start) throw new Error("Expected object key");
+        key = source.slice(start, pos);
+      }
+      skipWhitespace();
+      if (pos >= source.length || source[pos] !== ":") throw new Error("Expected ':' after object key");
+      pos++;
+      obj[key] = parseValue();
+      skipWhitespace();
+      if (pos < source.length && source[pos] === ",") { pos++; skipWhitespace(); continue; }
+      if (pos < source.length && source[pos] === "}") { pos++; return obj; }
+      throw new Error("Expected ',' or '}' in object");
+    }
+    throw new Error("Unterminated object");
+  }
+
+  try {
+    const result = parseValue();
+    skipWhitespace();
+    if (pos < source.length) throw new Error("Unexpected content after value");
+    return result;
+  } catch {
+    return source;
+  }
 }
 
 function extractChildText(node) {

@@ -316,6 +316,13 @@ async function validateMdx(file, knownCitationIds) {
     if (!/\sfallback=/.test(componentSource)) add("error", file, "Diagram is missing fallback text.");
   }
 
+  for (const match of findAll(/<MermaidDiagram\b/g, body)) {
+    const nextComponent = body.slice(match.index + 1).search(/\n\s*<[A-Z/]/);
+    const end = nextComponent === -1 ? body.length : match.index + 1 + nextComponent;
+    const componentSource = body.slice(match.index, end);
+    if (!/\sfallback=/.test(componentSource)) add("error", file, "MermaidDiagram is missing fallback text.");
+  }
+
   const riskyClaimPattern = /\b(best|most popular|guaranteed|always|never|latest)\b/i;
   const verifyBlocks = findAll(/<VerifyClaim[\s\S]*?<\/VerifyClaim>/g, body).map((match) => match[0]);
   const bodyWithoutVerifyBlocks = verifyBlocks.reduce((text, block) => text.replace(block, ""), body);

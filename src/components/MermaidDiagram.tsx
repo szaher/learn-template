@@ -62,7 +62,7 @@ function loadMermaid(theme?: "dark" | "light") {
 
 interface MermaidDiagramProps {
   chart?: string;
-  fallback?: string;
+  fallback: string;
   children?: React.ReactNode;
 }
 

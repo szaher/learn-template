@@ -26,7 +26,7 @@ export default function ChatMessage({ role, content }: ChatMessageProps) {
       >
         {parts.map((part, i) => {
           if (part.type === "mermaid") {
-            return <MermaidDiagram key={i} chart={part.content} />;
+            return <MermaidDiagram key={i} chart={part.content} fallback={part.content} />;
           }
           if (part.type === "code") {
             return (

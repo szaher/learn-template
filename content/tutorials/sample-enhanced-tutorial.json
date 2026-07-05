@@ -2,7 +2,7 @@
   "schemaVersion": "1.1.0",
   "id": "enhanced-ai-tutorial",
   "title": "Build Reliable AI Tutorials (Enhanced)",
-  "description": "An enhanced specification demonstrating content style, gamification, adaptive paths, and SOTA educational features.",
+  "description": "An enhanced specification demonstrating content style, gamification, adaptive paths, and optional learning-platform metadata. Some features described here are authoring-ready while others require runtime platform support.",
   "audience": {
     "primary": "Technical educators and developer advocates",
     "priorKnowledge": ["Basic Markdown", "Introductory TypeScript"],

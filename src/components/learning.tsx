@@ -107,7 +107,7 @@ export function Diagram({
   caption,
 }: {
   chart: string;
-  fallback?: string;
+  fallback: string;
   caption?: string;
 }) {
   return (

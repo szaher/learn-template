@@ -6,10 +6,8 @@ footer: 'Sample Deck'
 paginate: true
 ---
 
-<script type="module">
-import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs";
-mermaid.initialize({ startOnLoad: true, theme: "base", themeVariables: { primaryColor: "#e0f0ff", primaryTextColor: "#151515", primaryBorderColor: "#0066cc", lineColor: "#0066cc", secondaryColor: "#daf2f2", tertiaryColor: "#f2f2f2", noteBkgColor: "#fef0f0", noteTextColor: "#151515", fontFamily: "Red Hat Text, sans-serif" }});
-</script>
+<!-- Diagrams pre-rendered as local SVG for offline, PDF, and CSP-restricted use. -->
+<!-- To re-render: npx @mermaid-js/mermaid-cli -i diagram.mmd -o assets/diagram.svg -->
 
 <!-- _class: lead -->
 <!-- _paginate: false -->
@@ -92,18 +90,7 @@ Understanding the fundamentals is essential before moving to advanced topics.
 
 # System Architecture
 
-<div class="mermaid">
-graph LR
-    A[Client] --> B[API Gateway]
-    B --> C[Service A]
-    B --> D[Service B]
-    C --> E[(Database)]
-    D --> E
-    C --> F[Cache Layer]
-    D --> F
-    F --> G[Message Queue]
-    G --> H[Worker Pool]
-</div>
+![System Architecture](assets/architecture.svg)
 
 The system follows a microservices pattern with shared caching and asynchronous processing.
 
@@ -222,19 +209,7 @@ Time to apply what we have learned.
 
 # Workflow Diagram
 
-<div class="mermaid">
-flowchart TD
-    A[Start Exercise] --> B{Environment Ready?}
-    B -->|Yes| C[Write Pipeline Code]
-    B -->|No| D[Run Setup Script]
-    D --> B
-    C --> E[Run Tests]
-    E --> F{Tests Pass?}
-    F -->|Yes| G[Submit Results]
-    F -->|No| H[Debug and Fix]
-    H --> E
-    G --> I[Done]
-</div>
+![Workflow Diagram](assets/workflow.svg)
 
 Follow this workflow to complete the exercise. Ask for help if you are stuck for more than 5 minutes.
 
