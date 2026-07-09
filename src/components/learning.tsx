@@ -281,7 +281,7 @@ export function SlideEmbed({
 }) {
   return (
     <figure className="my-6">
-      <iframe src={src} title={title} className="aspect-video w-full rounded-lg border border-[var(--border)]" />
+      <iframe src={src} title={title} sandbox="allow-scripts allow-same-origin" className="aspect-video w-full rounded-lg border border-[var(--border)]" />
       {fallbackHref && (
         <figcaption className="mt-2 text-xs">
           <a href={fallbackHref}>Open slides</a>
@@ -302,8 +302,9 @@ export function Citation({
   quality: SourceQuality;
   children: ReactNode;
 }) {
+  const safeHref = /^https?:\/\//.test(href) ? href : "#";
   return (
-    <a href={href} data-citation-id={id} data-source-quality={quality} className="citation">
+    <a href={safeHref} data-citation-id={id} data-source-quality={quality} className="citation">
       {children}
       <span className="ml-1 text-xs text-[var(--text-secondary)]">[{qualityLabels[quality]}]</span>
     </a>

@@ -7,8 +7,17 @@ export const dynamic = "force-dynamic";
 const VALID_FORMATS = ["both", "markdown", "notebook"] as const;
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { module: moduleId, format = "both" } = body;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const { module: moduleId, format = "both" } = body as Record<string, unknown>;
 
   if (typeof format !== "string" || !VALID_FORMATS.includes(format as typeof VALID_FORMATS[number])) {
     return new Response(JSON.stringify({ error: `Invalid format. Must be one of: ${VALID_FORMATS.join(", ")}` }), {
@@ -40,7 +49,19 @@ export async function POST(request: NextRequest) {
     stdio: ["ignore", "pipe", "pipe"],
   });
 
+  request.signal.addEventListener("abort", () => {
+    proc.kill();
+  });
+
   (async () => {
+    let stderrOutput = "";
+
+    if (proc.stderr) {
+      proc.stderr.on("data", (chunk: Buffer) => {
+        stderrOutput += chunk.toString();
+      });
+    }
+
     try {
       if (proc.stdout) {
         for await (const chunk of proc.stdout) {
@@ -49,7 +70,19 @@ export async function POST(request: NextRequest) {
           );
         }
       }
-      await writer.write(encoder.encode(`data: ${JSON.stringify({ status: "done" })}\n\n`));
+
+      const exitCode = await new Promise<number | null>((resolve) => {
+        proc.on("close", resolve);
+      });
+
+      if (exitCode !== 0) {
+        const errorMsg = stderrOutput.trim() || `Export process exited with code ${exitCode}`;
+        await writer.write(
+          encoder.encode(`data: ${JSON.stringify({ error: errorMsg })}\n\n`)
+        );
+      } else {
+        await writer.write(encoder.encode(`data: ${JSON.stringify({ status: "done" })}\n\n`));
+      }
     } catch (err) {
       await writer.write(
         encoder.encode(`data: ${JSON.stringify({ error: String(err) })}\n\n`)

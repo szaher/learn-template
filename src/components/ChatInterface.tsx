@@ -12,6 +12,8 @@ interface ChatInterfaceProps {
   };
 }
 
+const MAX_PERSISTED_MESSAGES = 200;
+
 function loadHistory(): ChatMessageType[] {
   if (typeof localStorage === "undefined") return [];
   const raw = localStorage.getItem(storageKeys.chat);
@@ -24,7 +26,12 @@ function loadHistory(): ChatMessageType[] {
 }
 
 function saveHistory(messages: ChatMessageType[]) {
-  localStorage.setItem(storageKeys.chat, JSON.stringify(messages));
+  const trimmed = messages.slice(-MAX_PERSISTED_MESSAGES);
+  try {
+    localStorage.setItem(storageKeys.chat, JSON.stringify(trimmed));
+  } catch {
+    // QuotaExceededError — silently drop
+  }
 }
 
 export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
@@ -34,10 +41,17 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
   const messagesRef = useRef(messages);
+  const abortRef = useRef<AbortController | null>(null);
   messagesRef.current = messages;
 
   useEffect(() => {
     setMessages(loadHistory());
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
   }, []);
 
   const handleScroll = useCallback(() => {
@@ -55,13 +69,13 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
   }, [messages]);
 
   const sendMessage = useCallback(
-    async (text: string) => {
-      if (!text.trim() || streaming) return;
+    async (msgText: string) => {
+      if (!msgText.trim() || streaming) return;
 
       const userMsg: ChatMessageType = {
         id: crypto.randomUUID(),
         role: "user",
-        content: text.trim(),
+        content: msgText.trim(),
         timestamp: new Date().toISOString(),
       };
 
@@ -77,17 +91,21 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
       setInput("");
       setStreaming(true);
 
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: text.trim(),
+            message: msgText.trim(),
             context: {
               ...initialContext,
               history,
             },
           }),
+          signal: controller.signal,
         });
 
         if (!response.ok || !response.body) {
@@ -97,13 +115,15 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullContent = "";
+        let buffer = "";
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
 
-          const text = decoder.decode(value);
-          const lines = text.split("\n");
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
 
           for (const line of lines) {
             if (line.startsWith("data: ")) {
@@ -111,7 +131,11 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
               if (data === "[DONE]") break;
               try {
                 const chunk = JSON.parse(data);
-                fullContent += chunk;
+                if (typeof chunk === "string") {
+                  fullContent += chunk;
+                } else if (chunk && typeof chunk === "object" && "error" in chunk) {
+                  fullContent += `\n\nError: ${chunk.error}`;
+                }
                 setMessages((prev) => {
                   const copy = [...prev];
                   copy[copy.length - 1] = {
@@ -132,6 +156,7 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
           return prev;
         });
       } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setMessages((prev) => {
           const copy = [...prev];
           copy[copy.length - 1] = {
@@ -141,6 +166,7 @@ export default function ChatInterface({ initialContext }: ChatInterfaceProps) {
           return copy;
         });
       } finally {
+        abortRef.current = null;
         setStreaming(false);
       }
     },

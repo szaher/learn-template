@@ -325,8 +325,10 @@ async function validateMdx(file, knownCitationIds) {
 
   const riskyClaimPattern = /\b(best|most popular|guaranteed|always|never|latest)\b/i;
   const verifyBlocks = findAll(/<VerifyClaim[\s\S]*?<\/VerifyClaim>/g, body).map((match) => match[0]);
-  const bodyWithoutVerifyBlocks = verifyBlocks.reduce((text, block) => text.replace(block, ""), body);
-  if (riskyClaimPattern.test(bodyWithoutVerifyBlocks)) {
+  let proseOnly = verifyBlocks.reduce((text, block) => text.replace(block, ""), body);
+  proseOnly = proseOnly.replace(/```[\s\S]*?```/g, "");
+  proseOnly = proseOnly.replace(/`[^`]+`/g, "");
+  if (riskyClaimPattern.test(proseOnly)) {
     add("warning", file, "Potential unsupported claim outside VerifyClaim.");
   }
 
@@ -345,7 +347,13 @@ async function main() {
   const specFiles = await listFiles(path.join(contentDir, "tutorials"), (file) => file.endsWith(".json"));
   const citationIds = new Set();
   for (const file of specFiles) {
-    const spec = JSON.parse(await fs.readFile(file, "utf8"));
+    let spec;
+    try {
+      spec = JSON.parse(await fs.readFile(file, "utf8"));
+    } catch (error) {
+      add("error", file, `Invalid JSON: ${error.message}`);
+      continue;
+    }
     validateTutorialSpec(file, spec);
     await validateArtifactPaths(file, spec);
     for (const ref of spec.references ?? []) citationIds.add(ref.id);

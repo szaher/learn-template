@@ -16,7 +16,11 @@ function getAllNotes(): Record<string, string> {
 }
 
 function saveAllNotes(notes: Record<string, string>): void {
-  localStorage.setItem(storageKeys.notes, JSON.stringify(notes));
+  try {
+    localStorage.setItem(storageKeys.notes, JSON.stringify(notes));
+  } catch {
+    // QuotaExceededError or private browsing
+  }
 }
 
 export function getLessonNote(moduleId: number, lessonSlug: string): string {

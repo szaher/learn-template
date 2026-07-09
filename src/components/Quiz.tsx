@@ -25,7 +25,7 @@ export default function Quiz({ questions, onComplete }: QuizProps) {
     setScore(newScore);
     setSubmitted(true);
 
-    if (currentIndex === questions.length - 1 && correct) {
+    if (currentIndex === questions.length - 1) {
       setFinished(true);
       onComplete(newScore);
     }
@@ -143,7 +143,7 @@ export default function Quiz({ questions, onComplete }: QuizProps) {
                 Retry
               </button>
             )}
-            {currentIndex < questions.length - 1 && (
+            {currentIndex < questions.length - 1 && !finished && (
               <button
                 onClick={handleNext}
                 className="px-4 py-2 text-sm rounded-lg bg-[var(--accent-blue)] text-white hover:opacity-90 transition-opacity"

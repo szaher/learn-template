@@ -19,23 +19,39 @@ export function buildSystemPrompt(context?: PromptContext): string {
     prompt += ". Tailor your answers to this context.";
   }
 
-  if (context?.history && context.history.length > 0) {
-    const recent = context.history.slice(-10);
-    prompt += "\n\nRecent conversation history:\n";
+  return prompt;
+}
+
+export function buildMessages(
+  userMessage: string,
+  history?: ChatMessage[],
+): Array<{ role: "user" | "assistant"; content: string }> {
+  const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
+
+  if (history && history.length > 0) {
+    const recent = history.slice(-10);
     for (const msg of recent) {
-      prompt += `${msg.role === "user" ? "Student" : "Tutor"}: ${msg.content}\n`;
+      messages.push({
+        role: msg.role === "user" ? "user" : "assistant",
+        content: msg.content,
+      });
     }
   }
 
-  return prompt;
+  messages.push({ role: "user", content: userMessage });
+  return messages;
 }
 
 let _client: AnthropicVertex | null = null;
 
 function getClient(): AnthropicVertex {
   if (!_client) {
+    const projectId = process.env.ANTHROPIC_VERTEX_PROJECT_ID;
+    if (!projectId) {
+      throw new Error("ANTHROPIC_VERTEX_PROJECT_ID environment variable is required");
+    }
     _client = new AnthropicVertex({
-      projectId: process.env.ANTHROPIC_VERTEX_PROJECT_ID || "your-gcp-project",
+      projectId,
       region: process.env.CLOUD_ML_REGION || "us-east5",
     });
   }
@@ -47,6 +63,7 @@ export function streamClaude(
   context?: PromptContext
 ): { stream: AsyncIterable<string>; kill: () => void } {
   const systemPrompt = buildSystemPrompt(context);
+  const messages = buildMessages(userMessage, context?.history);
   let aborted = false;
 
   const stream = (async function* () {
@@ -54,7 +71,7 @@ export function streamClaude(
       model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
       max_tokens: 4096,
       system: systemPrompt,
-      messages: [{ role: "user", content: userMessage }],
+      messages,
     });
 
     for await (const event of response) {

@@ -43,21 +43,18 @@ function getResolvedTheme(): "dark" | "light" {
   return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
 }
 
-function loadMermaid(theme?: "dark" | "light") {
+async function loadMermaid(theme?: "dark" | "light") {
   const t = theme ?? getResolvedTheme();
-  if (mermaidMod && initializedTheme !== t) {
-    mermaidMod.default.initialize({ startOnLoad: false, ...MERMAID_THEMES[t] });
-    initializedTheme = t;
-    return Promise.resolve();
-  }
   if (!mermaidReady) {
     mermaidReady = import("mermaid").then((mod) => {
       mermaidMod = mod;
-      mod.default.initialize({ startOnLoad: false, ...MERMAID_THEMES[t] });
-      initializedTheme = t;
     });
   }
-  return mermaidReady;
+  await mermaidReady;
+  if (mermaidMod && initializedTheme !== t) {
+    mermaidMod.default.initialize({ startOnLoad: false, ...MERMAID_THEMES[t] });
+    initializedTheme = t;
+  }
 }
 
 interface MermaidDiagramProps {

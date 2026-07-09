@@ -14,7 +14,7 @@ export default async function HomePage() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {curriculum.modules.map((mod) => (
+        {curriculum.modules.filter((mod) => mod.lessons.length > 0).map((mod) => (
           <Link
             key={mod.id}
             href={`/lesson/${mod.id}/${mod.lessons[0].slug}`}

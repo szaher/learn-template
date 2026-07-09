@@ -37,6 +37,7 @@ export default function LessonContent({
   const [activeTab, setActiveTab] = useState<SidePanelTab>("notes");
   const [hasNotes, setHasNotes] = useState(false);
   const [sections, setSections] = useState<SpeechSection[]>([]);
+  const [, forceUpdate] = useState(0);
   const voiceState = useVoices();
 
   const speech = useSpeechSynthesis({
@@ -66,13 +67,20 @@ export default function LessonContent({
 
   useEffect(() => {
     if (!contentRef.current) return;
+    const container = contentRef.current;
     const timer = setTimeout(() => {
-      if (contentRef.current) {
-        const container = contentRef.current;
+      if (container) {
         setSections(extractSections(container).filter((section) => section.headingElement !== container));
       }
     }, 500);
-    return () => clearTimeout(timer);
+    const observer = new ResizeObserver(() => {
+      forceUpdate((n) => n + 1);
+    });
+    observer.observe(container);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, [children]);
 
   useEffect(() => {
@@ -106,13 +114,15 @@ export default function LessonContent({
 
   const handlePlayAll = useCallback(() => {
     if (sections.length > 0) speech.playAll(sections);
-  }, [sections, speech]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections, speech.playAll]);
 
   const handlePlaySection = useCallback(
     (index: number) => {
       if (sections[index]) speech.playSection(sections, index);
     },
-    [sections, speech],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sections, speech.playSection],
   );
 
   return (
@@ -268,7 +278,7 @@ export default function LessonContent({
 
           <div className="mt-8 p-4 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border)]">
             <Link
-              href={`/chat?context=${mod.id}:${lesson.slug}`}
+              href={`/chat?context=${encodeURIComponent(`${mod.id}:${lesson.slug}`)}`}
               className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition-colors"
             >
               <span>💬</span>

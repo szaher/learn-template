@@ -137,7 +137,7 @@ export function validateTutorialSpec(input: unknown): ValidationResult {
   collectIds(input.misconceptions, "$.misconceptions", issues);
   collectIds(input.workedExamples, "$.workedExamples", issues);
   const exerciseIds = collectIds(input.exercises, "$.exercises", issues);
-  collectIds(input.formativeAssessment, "$.formativeAssessment", issues);
+  const assessmentIds = collectIds(input.formativeAssessment, "$.formativeAssessment", issues);
   collectIds(input.masteryCriteria, "$.masteryCriteria", issues);
 
   if (lessonIds.size === 0) {
@@ -151,7 +151,7 @@ export function validateTutorialSpec(input: unknown): ValidationResult {
       if (typeof item.bloomLevel !== "string" || !BLOOM_LEVELS.includes(item.bloomLevel)) {
         issues.push(issue(`$.learningObjectives[${index}].bloomLevel`, "Expected a supported Bloom level."));
       }
-      requireRefs(item.assessmentIds, collectIds(input.formativeAssessment, "$.formativeAssessment", []), `$.learningObjectives[${index}].assessmentIds`, "assessment", issues);
+      requireRefs(item.assessmentIds, assessmentIds, `$.learningObjectives[${index}].assessmentIds`, "assessment", issues);
     });
   }
 
@@ -456,6 +456,7 @@ export function migrateSpec(input: Record<string, unknown>): Record<string, unkn
   if (input.schemaVersion === "1.0.0") {
     return {
       ...input,
+      schemaVersion: "1.1.0",
       contentStyle: input.contentStyle ?? undefined,
       gamification: input.gamification ?? undefined,
       adaptivePaths: input.adaptivePaths ?? undefined,

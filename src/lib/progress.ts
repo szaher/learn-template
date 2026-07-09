@@ -23,7 +23,11 @@ export function getProgress(): ProgressState {
 }
 
 function saveProgress(state: ProgressState): void {
-  localStorage.setItem(storageKeys.progress, JSON.stringify(state));
+  try {
+    localStorage.setItem(storageKeys.progress, JSON.stringify(state));
+  } catch {
+    // QuotaExceededError or private browsing
+  }
 }
 
 export function markLessonComplete(moduleId: number, lessonSlug: string, quizScore?: number): void {

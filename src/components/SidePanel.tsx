@@ -49,6 +49,7 @@ export default function SidePanel({
 
   const [noteText, setNoteText] = useState("");
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingNoteRef = useRef<{ moduleId: number; lessonSlug: string; value: string } | null>(null);
   const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -76,7 +77,9 @@ export default function SidePanel({
       setNoteText(value);
       onNoteChange?.(value.trim().length > 0);
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      pendingNoteRef.current = { moduleId, lessonSlug, value };
       saveTimerRef.current = setTimeout(() => {
+        pendingNoteRef.current = null;
         saveLessonNote(moduleId, lessonSlug, value);
       }, 500);
     },
@@ -87,6 +90,11 @@ export default function SidePanel({
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+      if (pendingNoteRef.current) {
+        const { moduleId: mid, lessonSlug: slug, value } = pendingNoteRef.current;
+        saveLessonNote(mid, slug, value);
+        pendingNoteRef.current = null;
+      }
     };
   }, []);
 

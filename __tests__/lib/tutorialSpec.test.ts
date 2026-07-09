@@ -514,10 +514,10 @@ describe("migrateSpec", () => {
     expect(output).toBe(input);
   });
 
-  it("preserves all existing 1.0.0 fields", () => {
+  it("preserves all existing 1.0.0 fields and updates schemaVersion", () => {
     const input = { schemaVersion: "1.0.0", id: "test" } as Record<string, unknown>;
     const output = migrateSpec(input);
     expect(output.id).toBe("test");
-    expect(output.schemaVersion).toBe("1.0.0");
+    expect(output.schemaVersion).toBe("1.1.0");
   });
 });

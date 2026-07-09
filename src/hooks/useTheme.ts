@@ -20,7 +20,11 @@ function applyTheme(mode: ThemeMode) {
 export function useTheme() {
   const [mode, setMode] = useState<ThemeMode>(() => {
     if (typeof localStorage === "undefined") return "system";
-    return (localStorage.getItem(storageKeys.theme) as ThemeMode | null) || "system";
+    try {
+      return (localStorage.getItem(storageKeys.theme) as ThemeMode | null) || "system";
+    } catch {
+      return "system";
+    }
   });
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export function useTheme() {
     setMode((prev) => {
       const order: ThemeMode[] = ["system", "light", "dark"];
       const next = order[(order.indexOf(prev) + 1) % order.length];
-      localStorage.setItem(storageKeys.theme, next);
+      try { localStorage.setItem(storageKeys.theme, next); } catch { /* quota or private browsing */ }
       applyTheme(next);
       return next;
     });

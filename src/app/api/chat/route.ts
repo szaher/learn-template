@@ -5,19 +5,27 @@ import type { ChatMessage } from "@/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const MAX_MESSAGE_LENGTH = 10_000;
+
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const {
-    message,
-    context,
-  }: {
-    message: string;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const { message, context } = body as {
+    message?: unknown;
     context?: {
       moduleTitle?: string;
       lessonTitle?: string;
       history?: ChatMessage[];
     };
-  } = body;
+  };
 
   if (!message || typeof message !== "string") {
     return new Response(JSON.stringify({ error: "Message required" }), {
@@ -26,11 +34,22 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { stream } = streamClaude(message, context);
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return new Response(JSON.stringify({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const { stream, kill } = streamClaude(message, context);
 
   const encoder = new TextEncoder();
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
+
+  request.signal.addEventListener("abort", () => {
+    kill();
+  });
 
   (async () => {
     try {
@@ -38,9 +57,9 @@ export async function POST(request: NextRequest) {
         await writer.write(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
       }
       await writer.write(encoder.encode("data: [DONE]\n\n"));
-    } catch (err) {
+    } catch {
       await writer.write(
-        encoder.encode(`data: ${JSON.stringify({ error: String(err) })}\n\n`)
+        encoder.encode(`data: ${JSON.stringify({ error: "An error occurred while processing your request" })}\n\n`)
       );
     } finally {
       await writer.close();

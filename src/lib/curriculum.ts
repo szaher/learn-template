@@ -4,7 +4,11 @@ import type { CurriculumData, ModuleMeta } from "@/types";
 
 const CONTENT_DIR = path.join(process.cwd(), "content");
 
+let cachedCurriculum: CurriculumData | null = null;
+
 export async function getCurriculum(): Promise<CurriculumData> {
+  if (cachedCurriculum) return cachedCurriculum;
+
   const entries = await fs.readdir(CONTENT_DIR);
   const moduleDirs = entries
     .filter((e) => e.startsWith("module-"))
@@ -17,11 +21,16 @@ export async function getCurriculum(): Promise<CurriculumData> {
   const modules: ModuleMeta[] = [];
   for (const dir of moduleDirs) {
     const metaPath = path.join(CONTENT_DIR, dir, "meta.json");
-    const raw = await fs.readFile(metaPath, "utf-8");
-    modules.push(JSON.parse(raw) as ModuleMeta);
+    try {
+      const raw = await fs.readFile(metaPath, "utf-8");
+      modules.push(JSON.parse(raw) as ModuleMeta);
+    } catch {
+      // Skip modules with missing or invalid meta.json
+    }
   }
 
-  return { modules };
+  cachedCurriculum = { modules };
+  return cachedCurriculum;
 }
 
 export async function getModuleMeta(moduleId: number): Promise<ModuleMeta | undefined> {
@@ -37,7 +46,10 @@ export async function getLessonContent(moduleId: number, lessonSlug: string): Pr
   const filePath = getLessonPath(moduleId, lessonSlug);
   try {
     return await fs.readFile(filePath, "utf-8");
-  } catch {
-    return null;
+  } catch (err: unknown) {
+    if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+    throw err;
   }
 }

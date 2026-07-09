@@ -31,9 +31,9 @@ async function readMdx(moduleId, slug) {
 
 function stripFrontmatter(content) {
   if (!content.startsWith("---")) return content;
-  const end = content.indexOf("---", 3);
+  const end = content.indexOf("\n---", 3);
   if (end === -1) return content;
-  return content.slice(end + 3).trimStart();
+  return content.slice(end + 4).trimStart();
 }
 
 function getAttr(node, name) {
